@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Reportes de Mantenimiento</title>
+    <link rel="stylesheet" href="estilos.css">
+</head>
+<body>
+
+   
+    
+    <!-- PANTALLA DE LOGIN -->
+    <div id="pantalla-login" class="pantalla-login">
+        <div class="login-container">
+            <h1>🔧 GlobalTecServices</h1>
+            <h2>Iniciar Sesión</h2>
+            
+            <form id="formLogin">
+                <label>Correo Electrónico:</label>
+                <input type="email" id="loginEmail" required placeholder="usuario@ejemplo.com">
+                
+                <label>Contraseña:</label>
+                <input type="password" id="loginPassword" required placeholder="••••••••">
+                
+                <div class="checkbox-mantener">
+                    <label>
+                        <input type="checkbox" id="mantenerSesion">
+                        Mantener sesión iniciada
+                    </label>
+                </div>
+                
+                <button type="submit">Iniciar Sesión</button>
+                
+                <p id="errorLogin" class="error-mensaje"></p>
+            </form>
+        </div>
+    </div>
+
+    <!-- PANTALLA PRINCIPAL (oculta hasta login exitoso) -->
+    <div id="app-principal" style="display: none;">
+    
+    <!-- HEADER SUPERIOR -->
+    <header class="header-top">
+        <button class="menu-toggle" onclick="toggleMenuLateral()">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+        <h1 class="header-title">📋 GlobalTec Services</h1>
+        <div class="header-spacer"></div>
+    </header>
+
+    <!-- MENÚ LATERAL -->
+    <nav class="menu-lateral" id="menuLateral">
+        <div class="menu-lateral-content">
+            <button onclick="mostrarSeccion('clientes')" class="btn-menu-lateral">
+                <span class="icon">👥</span> Clientes
+            </button>
+            <button onclick="mostrarSeccion('equipos')" class="btn-menu-lateral">
+                <span class="icon">🔧</span> Equipos
+            </button>
+            <button onclick="mostrarSeccion('reporte')" class="btn-menu-lateral activo">
+                <span class="icon">📄</span> Generar Reporte
+            </button>
+            <button onclick="mostrarSeccion('protocolo')" class="btn-menu-lateral">
+                <span class="icon">📋</span> Generar Protocolo
+            </button>
+            <button onclick="mostrarSeccion('ficha')" class="btn-menu-lateral">
+                <span class="icon">📑</span> Generar Ficha Técnica
+            </button>
+            <button onclick="mostrarSeccion('usuarios')" class="btn-menu-lateral">
+                <span class="icon">👤</span> Usuarios
+            </button>
+            
+            <div class="menu-divider"></div>
+            
+            <button onclick="cerrarSesion()" class="btn-menu-lateral btn-logout">
+                <span class="icon">🚪</span> Cerrar Sesión
+            </button>
+        </div>
+    </nav>
+
+    <!-- OVERLAY PARA CERRAR MENÚ EN MÓVIL -->
+    <div class="menu-overlay" id="menuOverlay" onclick="toggleMenuLateral()"></div>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <main class="contenido-principal">
+
+    <!-- SECCIÓN: GESTIÓN DE CLIENTES -->
+    <div id="seccion-clientes" class="seccion-contenido oculto">
+        <div class="contenedor">
+            <h1>Gestión de Clientes</h1>
+            
+            <div class="formulario-card">
+                <h2>Agregar Nuevo Cliente</h2>
+                <form id="formCliente">
+                    <label>Nombre:</label>
+                    <input type="text" id="clienteNombre" required>
+                    
+                    <label>Dirección:</label>
+                    <input type="text" id="clienteDireccion" required>
+                    
+                    <label>Teléfono:</label>
+                    <input type="tel" id="clienteTelefono" required>
+                    
+                    <label>Correo Electrónico:</label>
+                    <input type="email" id="clienteCorreo" required>
+                    
+                    <label>Logo del Cliente (Base64):</label>
+                    <div class="file-input-wrapper">
+                        <input type="file" id="clienteLogo" accept="image/*">
+                        <p class="file-help-text">El logo se convertirá automáticamente a Base64 para los PDFs</p>
+                    </div>
+                    <div id="logoPreview" class="logo-preview"></div>
+                    
+                    <button type="submit">Agregar Cliente</button>
+                </form>
+            </div>
+
+            <div class="lista-card">
+                <h2>Clientes Registrados</h2>
+                
+                <!-- BUSCADOR DE CLIENTES -->
+                <div class="buscador-container">
+                    <input type="text" 
+                           id="buscarCliente" 
+                           class="input-buscador" 
+                           placeholder="🔍 Buscar por nombre, dirección, teléfono o correo..."
+                           onkeyup="buscarClientes(this.value)">
+                </div>
+                
+                <div id="listaClientes"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL EDITAR CLIENTE -->
+    <div id="modalEditarCliente" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="close" onclick="cerrarModalCliente()">&times;</span>
+            <h2>Editar Cliente</h2>
+            <form id="formEditarCliente">
+                <input type="hidden" id="editClienteId">
+                
+                <label>Nombre:</label>
+                <input type="text" id="editClienteNombre" required>
+                
+                <label>Dirección:</label>
+                <input type="text" id="editClienteDireccion" required>
+                
+                <label>Teléfono:</label>
+                <input type="tel" id="editClienteTelefono" required>
+                
+                <label>Correo Electrónico:</label>
+                <input type="email" id="editClienteCorreo" required>
+                
+                <label>Logo del Cliente (Base64):</label>
+                <div class="file-input-wrapper">
+                    <input type="file" id="editClienteLogo" accept="image/*">
+                    <p class="file-help-text">Opcional: cambiar logo del cliente</p>
+                </div>
+                <div id="editLogoPreview" class="logo-preview"></div>
+                
+                <button type="submit">Guardar Cambios</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL EDITAR EQUIPO -->
+    <div id="modalEditarEquipo" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="close" onclick="cerrarModalEquipo()">&times;</span>
+            <h2>Editar Equipo</h2>
+            <form id="formEditarEquipo">
+                <input type="hidden" id="editEquipoId">
+                
+                <label>Cliente:</label>
+                <select id="editEquipoCliente" required disabled>
+                    <option value="">-- Cliente --</option>
+                </select>
+                
+                <label>Nombre del Equipo:</label>
+                <input type="text" id="editEquipoNombre" required>
+                
+                <label>Marca:</label>
+                <input type="text" id="editEquipoMarca" required>
+                
+                <label>Modelo:</label>
+                <input type="text" id="editEquipoModelo" required>
+                
+                <label>Serie:</label>
+                <input type="text" id="editEquipoSerie" required>
+                
+                <label>Ubicación:</label>
+                <input type="text" id="editEquipoUbicacion" required>
+                
+                <label>Accesorios (separados por coma):</label>
+                <input type="text" id="editEquipoAccesorios">
+                
+                <button type="submit">Guardar Cambios</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- SECCIÓN: GESTIÓN DE EQUIPOS -->
+    <div id="seccion-equipos" class="seccion-contenido oculto">
+        <div class="contenedor">
+            <h1>Gestión de Equipos</h1>
+            
+            <div class="formulario-card">
+                <h2>Agregar Nuevo Equipo</h2>
+                <form id="formEquipo">
+                    <label>Seleccionar Cliente:</label>
+                    <select id="equipoCliente" required>
+                        <option value="">-- Seleccione un cliente --</option>
+                    </select>
+                    
+                    <label>Nombre del Equipo:</label>
+                    <input type="text" id="equipoNombre" placeholder="Ej: UNIDAD ODONTOLÓGICA" required>
+                    
+                    <label>Marca:</label>
+                    <input type="text" id="equipoMarca" required>
+                    
+                    <label>Modelo:</label>
+                    <input type="text" id="equipoModelo" required>
+                    
+                    <label>Serie:</label>
+                    <input type="text" id="equipoSerie" required>
+                    
+                    <label>Ubicación:</label>
+                    <input type="text" id="equipoUbicacion" placeholder="Ej: CONSULTORIO 1 (Opcional)">
+                    
+                    <label>Accesorios (separados por coma):</label>
+                    <input type="text" id="equipoAccesorios" placeholder="Ej: LÁMPARA AUXILIAR, EYECTOR, ESCUPIDERA">
+                    
+                    <button type="submit">Agregar Equipo</button>
+                </form>
+            </div>
+
+            <div class="lista-card">
+                <h2>Equipos Registrados</h2>
+                
+                <!-- BUSCADOR DE EQUIPOS -->
+                <div class="buscador-container">
+                    <input type="text" 
+                           id="buscarEquipo" 
+                           class="input-buscador" 
+                           placeholder="🔍 Buscar por nombre, marca, modelo, serie, ubicación o cliente..."
+                           onkeyup="buscarEquipos(this.value)">
+                </div>
+                
+                <div id="listaEquipos"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SECCIÓN: GENERAR REPORTE -->
+    <div id="seccion-reporte" class="seccion-contenido">
+        <div class="contenedor">
+            <h1>Generar Reporte de Servicio</h1>
+            
+            <form id="formReporte">
+                
+                <!-- Selección de Cliente y Equipo -->
+                <div class="seccion">
+                    <h2>1. Datos Básicos</h2>
+                    
+                    <label>Seleccionar Cliente:</label>
+                    <select id="reporteCliente" required>
+                        <option value="">-- Seleccione un cliente --</option>
+                    </select>
+                    
+                    <label>Seleccionar Equipo:</label>
+                    <select id="reporteEquipo" required disabled>
+                        <option value="">-- Primero seleccione un cliente --</option>
+                    </select>
+                    
+                    <label>Fecha de Servicio:</label>
+                    <input type="date" id="reporteFecha" required>
+                </div>
+
+                <!-- Motivo del Servicio -->
+                <div class="seccion">
+                    <h2>2. Servicio Por</h2>
+                    <div class="radio-group">
+                        <label><input type="radio" name="servicioPor" value="CONTRATO" required> CONTRATO</label>
+                        <label><input type="radio" name="servicioPor" value="EVENTO"> EVENTO</label>
+                    </div>
+                </div>
+
+                <!-- Tipo de Mantenimiento -->
+                <div class="seccion">
+                    <h2>3. Tipo de Mantenimiento</h2>
+                    <div class="radio-group">
+                        <label><input type="radio" name="tipoMto" value="PREVENTIVO" required> PREVENTIVO</label>
+                        <label><input type="radio" name="tipoMto" value="CORRECTIVO"> CORRECTIVO</label>
+                        <label><input type="radio" name="tipoMto" value="DIAGNOSTICO"> DIAGNOSTICO</label>
+                        <label><input type="radio" name="tipoMto" value="INSTALACION"> INSTALACION</label>
+                        <label><input type="radio" name="tipoMto" value="DESINSTALACION"> DESINSTALACION</label>
+                        <label><input type="radio" name="tipoMto" value="BAJADELEQUIPO "> BAJA DEL EQUIPO</label>
+                    </div>
+                </div>
+
+                <!-- Estado del Equipo -->
+                <div class="seccion">
+                    <h2>4. Estado del Equipo</h2>
+                    <div class="radio-group">
+                        <label><input type="radio" name="estadoEquipo" value="FUNCIONANDO" required> FUNCIONANDO</label>
+                        <label><input type="radio" name="estadoEquipo" value="CON FALLA"> CON FALLA</label>
+                        <label><input type="radio" name="estadoEquipo" value="FUERA DE SERVICIO"> FUERA DE SERVICIO</label>
+                    </div>
+                </div>
+
+                <!-- Estado de Accesorios -->
+                <div class="seccion">
+                    <h2>5. Estado de Accesorios</h2>
+                    <div id="accesoriosContainer">
+                        <p class="texto-info">Seleccione un equipo para ver sus accesorios</p>
+                    </div>
+                </div>
+
+                <!-- Tareas Ejecutadas -->
+                <div class="seccion">
+                    <h2>6. Tareas Ejecutadas</h2>
+                    <div class="checkbox-group">
+                        <label><input type="checkbox" value="AJUSTE"> AJUSTE</label>
+                        <label><input type="checkbox" value="CONFIGURACIÓN"> CONFIGURACIÓN</label>
+                        <label><input type="checkbox" value="REPARACIÓN"> REPARACIÓN</label>
+                        <label><input type="checkbox" value="EVALUACIÓN"> EVALUACIÓN</label>
+                        <label><input type="checkbox" value="LUBRICACIÓN"> LUBRICACIÓN</label>
+                        <label><input type="checkbox" value="TEST TEMPERATURA"> TEST TEMPERATURA</label>
+                        <label><input type="checkbox" value="LIMPIEZA INTERNA"> LIMPIEZA INTERNA</label>
+                        <label><input type="checkbox" value="LIMPIEZA EXTERNA"> LIMPIEZA EXTERNA</label>
+                        <label><input type="checkbox" value="VERIFICACION DE FUGAS"> VERIFICACION DE FUGAS</label>
+                    </div>
+                </div>
+
+                <!-- Verificación de Parámetros -->
+                <div class="seccion">
+                    <h2>7. Verificación de Parámetros</h2>
+                    <div id="verificacionContainer"></div>
+                    <textarea id="verificacionParametros" rows="3" placeholder="Se completará automáticamente según el equipo seleccionado"></textarea>
+                </div>
+
+                <!-- Falla Reportada -->
+                <div class="seccion">
+                    <h2>8. Falla Reportada</h2>
+                    <textarea id="fallaReportada" rows="3" placeholder="Describa la falla reportada"></textarea>
+                </div>
+
+                <!-- Actividad de Mantenimiento -->
+                <div class="seccion">
+                    <h2>9. Actividad de Mantenimiento</h2>
+                    <textarea id="actividadMantenimiento" rows="6" placeholder="Describa detalladamente las actividades realizadas..." required></textarea>
+                </div>
+
+                <!-- Observaciones -->
+                <div class="seccion">
+                    <h2>10. Observaciones</h2>
+                    <textarea id="observaciones" rows="4" placeholder="Observaciones finales del servicio"></textarea>
+                </div>
+
+                <!-- Evidencia Fotográfica -->
+                <div class="seccion">
+                    <h2>11. Evidencia Fotográfica</h2>
+                    <input type="file" id="fotos" accept="image/*" multiple>
+                    <div id="previsualizacion"></div>
+                </div>
+
+                <button type="submit">Descargar Reporte</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- SECCIÓN: GENERAR PROTOCOLO -->
+    <div id="seccion-protocolo" class="seccion-contenido oculto">
+        <div class="contenedor">
+            <h1>Generar Protocolo de Mantenimiento</h1>
+            
+            <form id="formProtocolo">
+                <div class="seccion">
+                    <h2>Selección de Cliente y Tipo de Equipo</h2>
+                    
+                    <label>Seleccionar Cliente:</label>
+                    <select id="protocoloCliente" required>
+                        <option value="">-- Seleccione un cliente --</option>
+                    </select>
+                    
+                    <label>Tipo de Equipo:</label>
+                    <select id="protocoloTipoEquipo" required>
+                        <option value="">-- Seleccione el tipo de equipo --</option>
+                        <option value="UNIDAD ODONTOLOGICA">UNIDAD ODONTOLÓGICA</option>
+                        <option value="COMPRESOR">COMPRESOR</option>
+                        <option value="AUTOCLAVE">AUTOCLAVE</option>
+                        <option value="PIEZA DE MANO">PIEZA DE MANO</option>
+                        <option value="LAMPARA DE FOTOCURADO">LÁMPARA DE FOTOCURADO</option>
+                        <option value="TERMOMETRO">TERMÓMETRO</option>
+                        <option value="TERMOHIGROMETRO">TERMOHIGRÓMETRO</option>
+                        <option value="LOCALIZADOR APICAL">LOCALIZADOR APICAL</option>
+                        <option value="MOTOR DE ENDODONCIA">MOTOR DE ENDODONCIA</option>
+                        <option value="ELECTROBISTURI">ELECTROBISTURÍ</option>
+                        <option value="MICRODRENADOR">MICRODRENADOR</option>
+                        <option value="PROPHY JET">PROPHY JET</option>
+                        <option value="SELLADORA">SELLADORA</option>
+                        <option value="INCUBADORA">INCUBADORA</option>
+                        <option value="EQUIPOS DE RAYOS X PERIAPICAL">EQUIPOS DE RAYOS X PERIAPICAL</option>
+                        <option value="LAVADOR ULTRASONICO">LAVADOR ULTRASÓNICO</option>
+                    </select>
+                </div>
+
+                <div class="info-box">
+                    <p><strong>ℹ️ Información:</strong></p>
+                    <p>El protocolo se generará con el logo del cliente seleccionado.</p>
+                </div>
+
+                <button type="submit">📄 Generar Protocolo PDF</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- SECCIÓN: GENERAR FICHA TÉCNICA -->
+    <div id="seccion-ficha" class="seccion-contenido oculto">
+        <div class="contenedor">
+            <h1>Generar Ficha Técnica</h1>
+            
+            <form id="formFicha">
+                <div class="seccion">
+                    <h2>Datos Básicos</h2>
+                    
+                    <label>Seleccionar Cliente:</label>
+                    <select id="fichaCliente" required>
+                        <option value="">-- Seleccione un cliente --</option>
+                    </select>
+                    
+                    <label>Seleccionar Equipo:</label>
+                    <select id="fichaEquipo" required disabled>
+                        <option value="">-- Primero seleccione un cliente --</option>
+                    </select>
+                </div>
+
+                <div class="info-box">
+                    <p><strong>ℹ️ Próximamente:</strong></p>
+                    <p>Esta sección incluirá un formulario detallado con todos los campos técnicos necesarios para generar la ficha técnica completa del equipo.</p>
+                </div>
+
+                <button type="submit" disabled>📑 Generar Ficha Técnica (En desarrollo)</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- SECCIÓN: GESTIÓN DE USUARIOS (SOLO ADMIN) -->
+    <div id="seccion-usuarios" class="seccion-contenido oculto">
+        <div class="contenedor">
+            <h1>Gestión de Usuarios</h1>
+            
+            <div id="solo-admin-usuarios" style="display: none;">
+                <div class="formulario-card">
+                    <h2>Crear Nuevo Usuario</h2>
+                    <form id="formUsuario">
+                        <label>Correo Electrónico:</label>
+                        <input type="email" id="usuarioEmail" required placeholder="usuario@ejemplo.com">
+                        
+                        <label>Contraseña:</label>
+                        <input type="password" id="usuarioPassword" required placeholder="Mínimo 6 caracteres">
+                        
+                        <button type="submit">Crear Usuario</button>
+                    </form>
+                </div>
+
+                <div class="lista-card">
+                    <h2>Usuarios Registrados</h2>
+                    <div id="listaUsuarios"></div>
+                </div>
+            </div>
+            
+            <div id="no-admin-usuarios">
+                <p class="texto-info">Solo el administrador puede gestionar usuarios.</p>
+            </div>
+        </div>
+    </div>
+
+    </main>
+    <!-- FIN contenido-principal -->
+
+</div>
+<!-- FIN app-principal -->
+
+    <!-- Firebase versión 8 -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    
+    <!-- PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    
+    <!-- Configuración Firebase -->
+    <script src="firebase-config.js"></script>
+    
+    <!-- Tu código -->
+    <script src="script.js"></script>
+
+
+<div id="pantalla-cargando" class="pantalla-cargando">
+    <div class="loader-contenedor">
+        <div class="loader"></div>
+    </div>
+</div>
+
+</body>
+</html>
