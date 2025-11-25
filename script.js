@@ -1826,7 +1826,7 @@ function construirPDF(doc, datos) {
     
     if (datos.accesoriosEstado && datos.accesoriosEstado.length > 0) {
         datos.accesoriosEstado.slice(0, 7).forEach(acc => {
-            const texto = `${acc.nombre.substring(0, 18)}: ${acc.estado}`;
+            const texto = `${acc.nombre.substring(0, 60)}: ${acc.estado}`;
             doc.text(texto, col3X + 3, yCheck);
             yCheck += 4;
         });
