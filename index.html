@@ -63,11 +63,8 @@
             <button onclick="mostrarSeccion('reporte')" class="btn-menu-lateral activo">
                 <span class="icon">📄</span> Generar Reporte
             </button>
-            <button onclick="mostrarSeccion('protocolo')" class="btn-menu-lateral">
-                <span class="icon">📋</span> Generar Protocolo
-            </button>
-            <button onclick="mostrarSeccion('ficha')" class="btn-menu-lateral">
-                <span class="icon">📑</span> Generar Ficha Técnica
+            <button onclick="mostrarSeccion('configuracion')" class="btn-menu-lateral">
+                <span class="icon">⚙️</span> Configuración
             </button>
             <button onclick="mostrarSeccion('usuarios')" class="btn-menu-lateral">
                 <span class="icon">👤</span> Usuarios
@@ -105,7 +102,7 @@
                     <input type="tel" id="clienteTelefono" required>
                     
                     <label>Correo Electrónico:</label>
-                    <input type="email" id="clienteCorreo">
+                    <input type="email" id="clienteCorreo" required>
                     
                     <label>Logo del Cliente (Base64):</label>
                     <div class="file-input-wrapper">
@@ -153,7 +150,7 @@
                 <input type="tel" id="editClienteTelefono" required>
                 
                 <label>Correo Electrónico:</label>
-                <input type="email" id="editClienteCorreo">
+                <input type="email" id="editClienteCorreo" required>
                 
                 <label>Logo del Cliente (Base64):</label>
                 <div class="file-input-wrapper">
@@ -193,7 +190,7 @@
                 <input type="text" id="editEquipoSerie" required>
                 
                 <label>Ubicación:</label>
-                <input type="text" id="editEquipoUbicacion">
+                <input type="text" id="editEquipoUbicacion" required>
                 
                 <label>Accesorios (separados por coma):</label>
                 <input type="text" id="editEquipoAccesorios">
@@ -372,82 +369,26 @@
             </form>
         </div>
     </div>
+    
+    <!-- SECCIÓN: CONFIGURACION -->
+     <div id="seccion-configuracion" class="seccion-contenido oculto">
+    <div class="contenedor">
+        <h1>Configuración</h1>
 
-    <!-- SECCIÓN: GENERAR PROTOCOLO -->
-    <div id="seccion-protocolo" class="seccion-contenido oculto">
-        <div class="contenedor">
-            <h1>Generar Protocolo de Mantenimiento</h1>
-            
-            <form id="formProtocolo">
-                <div class="seccion">
-                    <h2>Selección de Cliente y Tipo de Equipo</h2>
-                    
-                    <label>Seleccionar Cliente:</label>
-                    <select id="protocoloCliente" required>
-                        <option value="">-- Seleccione un cliente --</option>
-                    </select>
-                    
-                    <label>Tipo de Equipo:</label>
-                    <select id="protocoloTipoEquipo" required>
-                        <option value="">-- Seleccione el tipo de equipo --</option>
-                        <option value="UNIDAD ODONTOLOGICA">UNIDAD ODONTOLÓGICA</option>
-                        <option value="COMPRESOR">COMPRESOR</option>
-                        <option value="AUTOCLAVE">AUTOCLAVE</option>
-                        <option value="PIEZA DE MANO">PIEZA DE MANO</option>
-                        <option value="LAMPARA DE FOTOCURADO">LÁMPARA DE FOTOCURADO</option>
-                        <option value="TERMOMETRO">TERMÓMETRO</option>
-                        <option value="TERMOHIGROMETRO">TERMOHIGRÓMETRO</option>
-                        <option value="LOCALIZADOR APICAL">LOCALIZADOR APICAL</option>
-                        <option value="MOTOR DE ENDODONCIA">MOTOR DE ENDODONCIA</option>
-                        <option value="ELECTROBISTURI">ELECTROBISTURÍ</option>
-                        <option value="MICRODRENADOR">MICRODRENADOR</option>
-                        <option value="PROPHY JET">PROPHY JET</option>
-                        <option value="SELLADORA">SELLADORA</option>
-                        <option value="INCUBADORA">INCUBADORA</option>
-                        <option value="EQUIPOS DE RAYOS X PERIAPICAL">EQUIPOS DE RAYOS X PERIAPICAL</option>
-                        <option value="LAVADOR ULTRASONICO">LAVADOR ULTRASÓNICO</option>
-                    </select>
-                </div>
+        <form id="formConfiguracion">
+        <label>Logo de la empresa:</label>
+        <input type="file" id="logoEmpresa" accept="image/*">
+        <div id="previewLogo"></div>
 
-                <div class="info-box">
-                    <p><strong>ℹ️ Información:</strong></p>
-                    <p>El protocolo se generará con el logo del cliente seleccionado.</p>
-                </div>
+        <label>Firma:</label>
+        <input type="file" id="firmaEmpresa" accept="image/*">
+        <div id="previewFirma"></div>
 
-                <button type="submit">📄 Generar Protocolo PDF</button>
-            </form>
-        </div>
+        <button type="submit">Guardar configuración</button>
+        </form>
+    </div>
     </div>
 
-    <!-- SECCIÓN: GENERAR FICHA TÉCNICA -->
-    <div id="seccion-ficha" class="seccion-contenido oculto">
-        <div class="contenedor">
-            <h1>Generar Ficha Técnica</h1>
-            
-            <form id="formFicha">
-                <div class="seccion">
-                    <h2>Datos Básicos</h2>
-                    
-                    <label>Seleccionar Cliente:</label>
-                    <select id="fichaCliente" required>
-                        <option value="">-- Seleccione un cliente --</option>
-                    </select>
-                    
-                    <label>Seleccionar Equipo:</label>
-                    <select id="fichaEquipo" required disabled>
-                        <option value="">-- Primero seleccione un cliente --</option>
-                    </select>
-                </div>
-
-                <div class="info-box">
-                    <p><strong>ℹ️ Próximamente:</strong></p>
-                    <p>Esta sección incluirá un formulario detallado con todos los campos técnicos necesarios para generar la ficha técnica completa del equipo.</p>
-                </div>
-
-                <button type="submit" disabled>📑 Generar Ficha Técnica (En desarrollo)</button>
-            </form>
-        </div>
-    </div>
 
     <!-- SECCIÓN: GESTIÓN DE USUARIOS (SOLO ADMIN) -->
     <div id="seccion-usuarios" class="seccion-contenido oculto">
@@ -509,6 +450,4 @@
 </div>
 
 </body>
-
 </html>
-
