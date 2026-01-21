@@ -948,4 +948,10 @@ button[type="submit"]:disabled {
     color: #333;
 }
 
+#previewLogo img,
+#previewFirma img {
+  margin-top: 10px;
+  border: 1px solid #ccc;
+  padding: 5px;
+}
 
