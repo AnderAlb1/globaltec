@@ -7,6 +7,9 @@ let usuarioActual = null;
 let esAdmin = false;
 let clientesCache = []; // Cache para búsqueda rápida
 let equiposCache = []; // Cache para búsqueda rápida
+let servicioActual = 'biomedico'; // Puede ser 'biomedico' o 'refrigeracion'
+
+
 
 // ============================================
 // AUTENTICACIÓN
@@ -128,6 +131,8 @@ function mostrarAppPrincipal() {
     cargarClientes();
     cargarEquipos();
     cargarClientesEnSelects();
+    mostrarServicio('biomedico');
+    cargarTecnicosEnSelects();
     
     if (esAdmin) {
         cargarUsuarios();
@@ -224,77 +229,136 @@ document.addEventListener('DOMContentLoaded', function() {
 // ============================================
 
 window.mostrarSeccion = function(seccion) {
+    // Si es configuración, ocultar pestañas de servicios y mostrar pestañas de configuración
+    if (seccion === 'configuracion') {
+        document.getElementById('pestanasSuperiores').style.display = 'none';
+        document.getElementById('pestanasConfiguracion').style.display = 'flex';
+        document.querySelector('.contenido-principal').classList.remove('con-pestanas');
+        document.querySelector('.contenido-principal').classList.add('con-pestanas-config');
+        
+        // Ocultar todas las secciones
+        document.querySelectorAll('.seccion-contenido').forEach(s => s.classList.add('oculto'));
+        
+        // Mostrar solo configuración
+        document.getElementById('seccion-configuracion').classList.remove('oculto');
+        
+        // Actualizar botón activo
+        document.querySelectorAll('.btn-menu-lateral').forEach(btn => btn.classList.remove('activo'));
+        document.querySelector('.btn-menu-lateral[onclick*="configuracion"]').classList.add('activo');
+        
+        // Mostrar la primera pestaña de configuración (logo)
+        mostrarPestanaConfig('logo');
+        
+        // Cerrar menú en móvil
+        if (window.innerWidth < 1025) {
+            toggleMenuLateral();
+        }
+    }
+}
 
-  const secciones = [
-    'seccion-clientes',
-    'seccion-equipos',
-    'seccion-reporte',
-    'seccion-configuracion',
-    'seccion-usuarios'
-  ];
+// ============================================
+// GESTIÓN DE SERVICIOS Y PESTAÑAS
+// ============================================
 
-  secciones.forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.classList.add('oculto');
-  });
-
-  document.querySelectorAll('.btn-menu-lateral:not(.btn-logout)')
-    .forEach(btn => btn.classList.remove('activo'));
-
-  const botones = document.querySelectorAll('.btn-menu-lateral:not(.btn-logout)');
-
-  if (seccion === 'clientes') {
-    document.getElementById('seccion-clientes').classList.remove('oculto');
-    botones[0].classList.add('activo');
-
-  } else if (seccion === 'equipos') {
-    document.getElementById('seccion-equipos').classList.remove('oculto');
-    botones[1].classList.add('activo');
-
-  } else if (seccion === 'reporte') {
-    document.getElementById('seccion-reporte').classList.remove('oculto');
-    botones[2].classList.add('activo');
-
-  } else if (seccion === 'configuracion') {
-    document.getElementById('seccion-configuracion').classList.remove('oculto');
-    botones[3].classList.add('activo');
-    cargarConfiguracion();
-
-  } else if (seccion === 'usuarios') {
-    document.getElementById('seccion-usuarios').classList.remove('oculto');
-    botones[4].classList.add('activo');
-  }
-
-  localStorage.setItem('ultimaSeccion', seccion);
-
-  // En móvil/tablet, cerrar el menú después de seleccionar
+window.mostrarServicio = function(servicio) {
+    servicioActual = servicio;
+    
+    // Actualizar botones del menú lateral
+    document.querySelectorAll('.btn-menu-lateral').forEach(btn => {
+        btn.classList.remove('activo');
+    });
+    document.querySelector(`.btn-menu-lateral[data-servicio="${servicio}"]`).classList.add('activo');
+    
+    // Ocultar pestañas de configuración
+    document.getElementById('pestanasConfiguracion').style.display = 'none';
+    
+    // Mostrar pestañas superiores de servicios
+    document.getElementById('pestanasSuperiores').style.display = 'flex';
+    
+    // Actualizar clases del contenido principal
+    document.querySelector('.contenido-principal').classList.remove('con-pestanas-config');
+    document.querySelector('.contenido-principal').classList.add('con-pestanas');
+    
+    // Cargar datos específicos del servicio
+    if (servicio === 'biomedico') {
+        cargarClientes();
+        cargarEquipos();
+        cargarClientesEnSelects();
+    } else if (servicio === 'refrigeracion') {
+        cargarClientesRefrigeracion();
+        cargarEquiposRefrigeracion();
+        cargarClientesEnSelectsRefrigeracion();
+    }
+    
+    // Mostrar la primera pestaña (clientes)
+    mostrarPestana('clientes');
+    
+    // Cerrar menú en móvil
     if (window.innerWidth < 1025) {
         toggleMenuLateral();
     }
-
-};
-
-
-// Preview para editar cliente
-const inputLogoEditar = document.getElementById('editClienteLogo');
-if (inputLogoEditar) {
-    inputLogoEditar.addEventListener('change', function(e) {
-        const file = e.target.files[0];
-        const preview = document.getElementById('editLogoPreview');
-        
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = function(event) {
-                preview.innerHTML = `<img src="${event.target.result}" alt="Logo preview">`;
-                preview.classList.remove('empty');
-            };
-            reader.readAsDataURL(file);
-        } else {
-            preview.innerHTML = '';
-            preview.classList.add('empty');
-        }
-    });
 }
+
+window.mostrarPestana = function(pestaña) {
+    // Ocultar todas las secciones
+    const todasLasSecciones = document.querySelectorAll('.seccion-contenido');
+    todasLasSecciones.forEach(seccion => seccion.classList.add('oculto'));
+    
+    // Actualizar botones de pestañas
+    document.querySelectorAll('.pestaña-btn').forEach(btn => {
+        btn.classList.remove('activa');
+    });
+    document.querySelector(`.pestaña-btn[data-pestaña="${pestaña}"]`).classList.add('activa');
+    
+    // Mostrar la sección correspondiente según el servicio
+    const sufijo = servicioActual === 'refrigeracion' ? '-refrigeracion' : '';
+    const seccionId = `seccion-${pestaña}${sufijo}`;
+    
+    const seccion = document.getElementById(seccionId);
+    if (seccion) {
+        seccion.classList.remove('oculto');
+    }
+    
+    localStorage.setItem('ultimaPestaña', pestaña);
+}
+
+// ============================================
+// GESTIÓN DE PESTAÑAS DE CONFIGURACIÓN
+// ============================================
+
+window.mostrarPestanaConfig = function(pestaña) {
+    // Ocultar todas las subsecciones de configuración
+    document.querySelectorAll('.config-subseccion').forEach(subseccion => {
+        subseccion.classList.add('oculto');
+    });
+    
+    // Actualizar botones de pestañas de configuración
+    document.querySelectorAll('.pestaña-config-btn').forEach(btn => {
+        btn.classList.remove('activa');
+    });
+    document.querySelector(`.pestaña-config-btn[data-pestaña-config="${pestaña}"]`).classList.add('activa');
+    
+    // Mostrar la subsección correspondiente
+    const subseccionId = `config-${pestaña}`;
+    const subseccion = document.getElementById(subseccionId);
+    if (subseccion) {
+        subseccion.classList.remove('oculto');
+    }
+    
+    // Cargar datos específicos
+    if (pestaña === 'logo') {
+        cargarConfiguracion();
+    } else if (pestaña === 'tecnicos') {
+        cargarTecnicos();
+    } else if (pestaña === 'usuarios') {
+        if (esAdmin) {
+            cargarUsuarios();
+        }
+    }
+    
+    localStorage.setItem('ultimaPestanaConfig', pestaña);
+}
+
 
 // ============================================
 // RESPONSIVE - CERRAR MENÚ AL CAMBIAR TAMAÑO
@@ -390,24 +454,11 @@ window.toggleEstadoAccesorio = function(button) {
 document.getElementById('formCliente').addEventListener('submit', async function(e) {
     e.preventDefault();
 
-    // Tomar logo en Base64
-    let logoBase64 = "";
-    const file = document.getElementById('clienteLogo').files[0];
-
-    if (file) {
-        logoBase64 = await new Promise(resolve => {
-            const reader = new FileReader();
-            reader.onload = e => resolve(e.target.result);
-            reader.readAsDataURL(file);
-        });
-    }
-
     const cliente = {
         nombre: document.getElementById('clienteNombre').value,
         direccion: document.getElementById('clienteDireccion').value,
         telefono: document.getElementById('clienteTelefono').value,
         correo: document.getElementById('clienteCorreo').value,
-        logo: logoBase64,                 // ← GUARDADO
         fechaCreacion: firebase.firestore.FieldValue.serverTimestamp(),
         creadoPor: usuarioActual.email
     };
@@ -416,7 +467,6 @@ document.getElementById('formCliente').addEventListener('submit', async function
         .then(() => {
             alert("Cliente agregado exitosamente");
             document.getElementById('formCliente').reset();
-            document.getElementById('logoPreview').innerHTML = "";
             cargarClientes();
             cargarClientesEnSelects();
         })
@@ -458,7 +508,7 @@ function mostrarClientes(clientes) {
         div.className = 'item-lista';
         div.innerHTML = `
             <div class="item-info">
-                <h3>📋 ${cliente.nombre}</h3>
+                <h3> ${cliente.nombre}</h3>
                 <p><strong>Dirección:</strong> ${cliente.direccion}</p>
                 <p><strong>Teléfono:</strong> ${cliente.telefono}</p>
                 <p><strong>Correo:</strong> ${cliente.correo}</p>
@@ -571,7 +621,7 @@ function mostrarEquipos(equipos) {
         div.className = 'item-lista';
         div.innerHTML = `
             <div class="item-info">
-                <h3>🔧 ${equipo.nombre} - ${equipo.marca}</h3>
+                <h3> ${equipo.nombre} - ${equipo.marca}</h3>
                 <p><strong>Cliente:</strong> ${equipo.clienteNombre}</p>
                 <p><strong>Modelo:</strong> ${equipo.modelo} | <strong>Serie:</strong> ${equipo.serie}</p>
                 <p><strong>Ubicación:</strong> ${equipo.ubicacion}</p>
@@ -1037,18 +1087,6 @@ document.getElementById('formEditarCliente').addEventListener('submit', async fu
     let telefono = document.getElementById("editClienteTelefono").value;
     let correo = document.getElementById("editClienteCorreo").value;
 
-    // Procesar logo (solo si el usuario seleccionó uno nuevo)
-    let nuevoLogoBase64 = null;
-    const archivoNuevo = document.getElementById("editClienteLogo").files[0];
-
-    if (archivoNuevo) {
-        nuevoLogoBase64 = await new Promise(resolve => {
-            const reader = new FileReader();
-            reader.onload = e => resolve(e.target.result);
-            reader.readAsDataURL(archivoNuevo);
-        });
-    }
-
     // Construir objeto con datos actualizados
     const datosActualizados = {
         nombre,
@@ -1056,11 +1094,6 @@ document.getElementById('formEditarCliente').addEventListener('submit', async fu
         telefono,
         correo
     };
-
-    // Solo agregamos logo si el usuario subió uno
-    if (nuevoLogoBase64 !== null) {
-        datosActualizados.logo = nuevoLogoBase64;
-    }
 
     // Guardar en Firestore
     db.collection("clientes").doc(id).update(datosActualizados)
@@ -1106,6 +1139,22 @@ async function generarPDF() {
         const tipoMto = document.querySelector('input[name="tipoMto"]:checked').value;
         const estadoEquipo = document.querySelector('input[name="estadoEquipo"]:checked').value;
         
+        // Obtener técnico seleccionado
+        const tecnicoId = document.getElementById('reporteTecnico').value;
+        if (!tecnicoId) {
+            alert('Por favor seleccione un técnico');
+            return;
+        }
+
+        // Obtener datos del técnico desde Firebase
+        const tecnicoDoc = await db.collection('tecnicos').doc(tecnicoId).get();
+        if (!tecnicoDoc.exists) {
+            alert('Error: No se encontró el técnico seleccionado');
+            return;
+        }
+
+        const tecnicoData = tecnicoDoc.data();
+
         // Tareas ejecutadas (checkboxes marcados)
         const tareasCheckboxes = document.querySelectorAll('#formReporte .checkbox-group input[type="checkbox"]:checked');
         const tareas = Array.from(tareasCheckboxes).map(cb => cb.value);
@@ -1146,7 +1195,8 @@ async function generarPDF() {
             fallaReportada,
             actividadMantenimiento,
             observaciones,
-            accesoriosEstado
+            accesoriosEstado,
+            tecnicoData
         });
         
     } catch (error) {
@@ -1759,17 +1809,17 @@ if (datos.verificacionParametros.tipo === 'LAMPARA') {
     
     doc.setFontSize(7);
     doc.setFont(undefined, 'normal');
-    doc.text('JORGE IVAN MEJIA MONTAÑO', margin + 3, y+2 + 11);
-    doc.text('INGENIERO DE SERVICIO', margin + 3, y+2 + 15);
-    doc.text('REG INVIMA RH-202010-00277', margin + 3, y+2 + 19);
+    doc.text(datos.tecnicoData.nombre.toUpperCase(), margin + 3, y+2 + 11);
+    doc.text(datos.tecnicoData.cargo.toUpperCase(), margin + 3, y+2 + 15);
+    doc.text(`REG. INVIMA ${datos.tecnicoData.registroInvima}`, margin + 3, y+2 + 19);
     
-    // Agregar firma
+    // Agregar firma del técnico
     try {
-         if(firmaBase64) {  // VERIFICAR QUE EXISTA
-            doc.addImage(firmaBase64, 'PNG', margin + 50, y + 9, 30, 14);
+        if(datos.tecnicoData.firma) {  // Usar firma del técnico seleccionado
+            doc.addImage(datos.tecnicoData.firma, 'PNG', margin + 50, y + 9, 30, 14);
         }
     } catch (e) {
-        console.log('Error cargando firma');
+        console.log('Error cargando firma del técnico');
     }
     
     doc.setDrawColor(0, 0, 0);
@@ -1994,6 +2044,24 @@ const leyendasPreventivoEspecificas = {
 
     'TERMOMETRO': 'SE REALIZALIMPIEZA INTERNA Y EXTERNA DEL EQUIPO, SE VERIFICA ESTADO INTEGRAL DE LA CARCASA Y SONDA, SE REALIZA DESARME PARCIAL PARA VERIFICAR ESTADO FISICO Y FUNCIONAL DEL CIRCUITO ELECTRÓNICO, DISPLAY, BOTONES Y SONDA.',
 
+    'TERMOFORMADOR' : 'SE REALIZA LIMPIEZA INTERNA Y EXTERNA DEL EQUIPO, SE REALIZA DESARME PARCIAL PARA VERIFICAAR ESTADO FÍSICO Y FUNCIONAL DEL CIRCUITO ELECTRÓNICO, MECANICO, MECANISMO DE ASCENSO Y DESCENSO, BANDEJA DE TERMOFORMADO, RESISTENCIA Y MOTOR DE SUCCIÓN.',
+
+    'TERMOHIGROMETRO' : 'SE REALIZA LIMPIEZA INTERNA Y EXTERNA DEL EQUIPO, SE VERIFICA ESTADO INTEGRAL DE LA CARCASA, PANTALLA , BOTONES Y SONDA, SE REALIZA DESARME PARCIAL PARA VERIFICAR ESTADO DEL CIRCUITO ELECTRÓNICO Y DEL SENSOR DE TEMPERATURA Y HUMEDAD RELATIVA.',
+
+    'MOTOR DE ENDODONCIA' : 'SE REALIZA LIMPIEZA EXTERNA E INTERNA DEL EQUIPO, SE VERIFICA ESTADO INTEGRAL DE LA CARCASA TANTO DE LA BASE COMO DE LA PIEZA DE MANO. SE REALIZA VERIFICACIÓN  DEL CONTRA ANGULO, INCLUYENDO LUBRICACIÓN DEL MECANISMO Y CARTUCHO',
+
+    'SCALER ULTRASONICO' : 'SE REALIZA LIMPIEZA INTERNA Y EXTERNA DEL EQUIPO, SE VERIFICA ESTADO INTEGRAL DE LA CARCASA, SE REALIZA DESARME PARCIAL PARA VERIFICAR ESTADO DEL CIRCUITO ELECTRÓNICO E HIDRÁULICO, SE VERIFICA ESTADO DEL CIRCUITO ELECTRÓNICO, PEDAL Y PIEZA DE MANO. SE REALIZA DESARME DE LA VÁLVULA SOLENOIDE PARA VERIFICACIÓN DE ESTADO Y LUBRICACIÓN',
+
+    'SCALER ULTRASONIDO' : 'SE REALIZA LIMPIEZA INTERNA Y EXTERNA DEL EQUIPO, SE VERIFICA ESTADO INTEGRAL DE LA CARCASA, SE REALIZA DESARME PARCIAL PARA VERIFICAR ESTADO DEL CIRCUITO ELECTRÓNICO E HIDRÁULICO, SE VERIFICA ESTADO DEL CIRCUITO ELECTRÓNICO, PEDAL Y PIEZA DE MANO. SE REALIZA DESARME DE LA VÁLVULA SOLENOIDE PARA VERIFICACIÓN DE ESTADO Y LUBRICACIÓN',
+
+    'MICROMOTOR' : 'SE REALIZA LIMPIEZA INTERNA Y EXTERNA DEL EQUIPO. SE VERIFICA ESTADO INTEGRAL DE LA CARCASA, CIRCUITO ELECTRÓNICO, BOTONES, PERILLA, PEDAL Y CABLES. SE REALIZA DESARME PARCIAL DEL PEDAL Y MICROMOTOR PARA VERIFICAR SU ESTADO',
+
+    'MOTOR ELECTRICO' : 'SE REALIZA LIMPIEZA INTERNA Y EXTERNA DEL EQUIPO. SE VERIFICA ESTADO INTEGRAL DE LA CARCASA, CIRCUITO ELECTRÓNICO, BOTONES, PERILLA, PEDAL Y CABLES. SE REALIZA DESARME PARCIAL DEL PEDAL Y MICROMOTOR PARA VERIFICAR SU ESTADO',
+
+    'DESTILADOR' : 'SE REALIZA LIMPIEZA INTERNA Y EXTERNA DEL EQUIPO, SE VERIFICA ESTADO INTEGRAL DE LA CARCASA, TANQUES DE AGUA, CIRCUITO ELECTRÓNICO E HIDRÁULICO, RESISTENCIA Y VENTILADOR.  SE VERIFICA ESTADO DEL SWITCH DE INICIO, SE REALIZA LAVADO DEL DEPÓSITO Y FILTRO DE LA RESISTENCIA',
+
+    
+
 };
 
 // Función para obtener el nombre del equipo seleccionado
@@ -2119,7 +2187,6 @@ document.getElementById('formConfiguracion')
     e.preventDefault();
 
     const logoFile = document.getElementById('logoEmpresa').files[0];
-    const firmaFile = document.getElementById('firmaEmpresa').files[0];
 
     const toBase64 = file => new Promise(resolve => {
       if (!file) return resolve(null);
@@ -2129,11 +2196,9 @@ document.getElementById('formConfiguracion')
     });
 
     const logo = await toBase64(logoFile);
-    const firma = await toBase64(firmaFile);
 
     const data = {};
-    if (logo) data.logoBase64 = logo;      // ← CAMBIAR AQUÍ
-    if (firma) data.firmaBase64 = firma;   // ← CAMBIAR AQUÍ
+    if (logo) data.logoBase64 = logo;        
     data.actualizado = firebase.firestore.FieldValue.serverTimestamp();
 
     await db.collection('configuracion')
@@ -2153,6 +2218,1207 @@ async function cargarConfiguracion() {
   if (d.logoBase64)  // ← CAMBIAR AQUÍ
     previewLogo.innerHTML = `<img src="${d.logoBase64}" style="max-width:200px">`;
 
-  if (d.firmaBase64)  // ← CAMBIAR AQUÍ
-    previewFirma.innerHTML = `<img src="${d.firmaBase64}" style="max-width:200px">`;
 }
+
+// ============================================
+// ALTERNAR ENTRE FORMULARIO MANUAL Y EXCEL
+// ============================================
+
+function mostrarFormularioManual() {
+    document.getElementById('formularioManual').style.display = 'block';
+    document.getElementById('formularioExcel').style.display = 'none';
+    document.getElementById('btnManual').classList.add('activo');
+    document.getElementById('btnExcel').classList.remove('activo');
+}
+
+function mostrarFormularioExcel() {
+    document.getElementById('formularioManual').style.display = 'none';
+    document.getElementById('formularioExcel').style.display = 'block';
+    document.getElementById('btnManual').classList.remove('activo');
+    document.getElementById('btnExcel').classList.add('activo');
+}
+
+// ============================================
+// PROCESAR ARCHIVO EXCEL
+// ============================================
+
+// Detectar cuando se selecciona un archivo
+document.addEventListener('DOMContentLoaded', function() {
+    const inputExcel = document.getElementById('archivoExcel');
+    if (inputExcel) {
+        inputExcel.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                leerArchivoExcel(file);
+            }
+        });
+    }
+});
+
+let equiposDesdeExcel = [];
+
+async function leerArchivoExcel(file) {
+    try {
+        const data = await file.arrayBuffer();
+        const workbook = XLSX.read(data);
+        const primeraHoja = workbook.Sheets[workbook.SheetNames[0]];
+        const datos = XLSX.utils.sheet_to_json(primeraHoja, { header: 1 });
+        
+        // Omitir primera fila si parece ser encabezado
+        const filas = datos[0] && typeof datos[0][0] === 'string' ? datos.slice(1) : datos;
+        
+        equiposDesdeExcel = [];
+        
+        filas.forEach((fila, index) => {
+            // Saltar filas vacías
+            if (!fila || !fila[0]) return;
+            
+            const equipo = {
+                nombre: (fila[0] || '').toString().trim().toUpperCase(),
+                marca: (fila[1] || '').toString().trim().toUpperCase(),
+                modelo: (fila[2] || '').toString().trim().toUpperCase(),
+                serie: (fila[3] || '').toString().trim().toUpperCase(),
+                ubicacion: (fila[4] || '').toString().trim().toUpperCase(),
+                accesorios: fila[5] ? fila[5].toString().split(',').map(a => a.trim().toUpperCase()) : []
+            };
+            
+            // Solo agregar si tiene al menos nombre y marca
+            if (equipo.nombre && equipo.marca) {
+                equiposDesdeExcel.push(equipo);
+            }
+        });
+        
+        mostrarVistaPrevia();
+        document.getElementById('btnProcesarExcel').disabled = equiposDesdeExcel.length === 0;
+        
+    } catch (error) {
+        alert('Error al leer el archivo Excel: ' + error.message);
+        console.error(error);
+    }
+}
+
+function mostrarVistaPrevia() {
+    const vistaPrevia = document.getElementById('vistaPrevia');
+    const contenido = document.getElementById('contenidoVistaPrevia');
+    
+    if (equiposDesdeExcel.length === 0) {
+        vistaPrevia.style.display = 'none';
+        return;
+    }
+    
+    vistaPrevia.style.display = 'block';
+    
+    let html = `<p><strong>Total de equipos encontrados: ${equiposDesdeExcel.length}</strong></p>`;
+    
+    equiposDesdeExcel.forEach((eq, i) => {
+        html += `
+            <div style="padding: 8px; margin: 5px 0; background: white; border-left: 3px solid #4CAF50; border-radius: 3px;">
+                <strong>${i + 1}. ${eq.nombre}</strong> - ${eq.marca} ${eq.modelo}<br>
+                <small>Serie: ${eq.serie} | Ubicación: ${eq.ubicacion || 'N/A'}</small>
+                ${eq.accesorios.length > 0 ? `<br><small>Accesorios: ${eq.accesorios.join(', ')}</small>` : ''}
+            </div>
+        `;
+    });
+    
+    contenido.innerHTML = html;
+}
+
+async function procesarExcel() {
+    const clienteId = document.getElementById('equipoCliente').value;
+    
+    if (!clienteId) {
+        alert('Por favor seleccione un cliente primero');
+        return;
+    }
+    
+    if (equiposDesdeExcel.length === 0) {
+        alert('No hay equipos para procesar');
+        return;
+    }
+    
+    if (!confirm(`¿Desea agregar ${equiposDesdeExcel.length} equipos al cliente seleccionado?`)) {
+        return;
+    }
+    
+    const btnProcesar = document.getElementById('btnProcesarExcel');
+    btnProcesar.disabled = true;
+    btnProcesar.textContent = 'Procesando...';
+    
+    let exitosos = 0;
+    let fallidos = 0;
+    
+    for (const equipo of equiposDesdeExcel) {
+        try {
+            await db.collection('equipos').add({
+                clienteId: clienteId,
+                nombre: equipo.nombre,
+                marca: equipo.marca,
+                modelo: equipo.modelo,
+                serie: equipo.serie,
+                ubicacion: equipo.ubicacion,
+                accesorios: equipo.accesorios,
+                fechaCreacion: firebase.firestore.FieldValue.serverTimestamp(),
+                creadoPor: usuarioActual.email
+            });
+            exitosos++;
+        } catch (error) {
+            console.error('Error al agregar equipo:', equipo.nombre, error);
+            fallidos++;
+        }
+    }
+    
+    alert(`Proceso completado:\n✓ ${exitosos} equipos agregados exitosamente\n${fallidos > 0 ? `✗ ${fallidos} equipos fallaron` : ''}`);
+    
+    // Limpiar y recargar
+    document.getElementById('archivoExcel').value = '';
+    equiposDesdeExcel = [];
+    document.getElementById('vistaPrevia').style.display = 'none';
+    btnProcesar.disabled = true;
+    btnProcesar.textContent = 'Agregar Equipos desde Excel';
+    
+    cargarEquipos();
+}
+
+// ============================================
+// FUNCIONES PARA SERVICIO DE REFRIGERACIÓN
+// ============================================
+
+// Cargar clientes de refrigeración
+function cargarClientesRefrigeracion() {
+    db.collection('clientes-refrigeracion').orderBy('nombre').get()
+        .then((querySnapshot) => {
+            const lista = document.getElementById('listaClientesRefrigeracion');
+            lista.innerHTML = '';
+            
+            if (querySnapshot.empty) {
+                lista.innerHTML = '<p class="texto-info">No hay clientes registrados en refrigeración</p>';
+                return;
+            }
+            
+            querySnapshot.forEach((doc) => {
+                const cliente = doc.data();
+                const div = document.createElement('div');
+                div.className = 'item-lista';
+                div.innerHTML = `
+                    <div class="item-info">
+                        <h3>${cliente.nombre}</h3>
+                        <p></strong>Dirección:</strong> ${cliente.direccion}</p>
+                        <p></strong>Télefono:</strong> ${cliente.telefono}</p>
+                        <p></strong>Correo:</strong> ${cliente.correo || 'Sin correo'}</p>
+                    </div>
+                    <div class="item-acciones">
+                        <button onclick="editarClienteRefrigeracion('${doc.id}')" class="btn-editar">Editar</button>
+                        <button onclick="eliminarClienteRefrigeracion('${doc.id}')" class="btn-eliminar">Eliminar</button>
+                    </div>
+                `;
+                lista.appendChild(div);
+            });
+        })
+        .catch((error) => {
+            console.error('Error al cargar clientes de refrigeración:', error);
+        });
+}
+
+// Cargar equipos de refrigeración
+function cargarEquiposRefrigeracion() {
+    db.collection('equipos-refrigeracion').orderBy('nombre').get()
+        .then((querySnapshot) => {
+            const lista = document.getElementById('listaEquiposRefrigeracion');
+            lista.innerHTML = '';
+            
+            if (querySnapshot.empty) {
+                lista.innerHTML = '<p class="texto-info">No hay equipos registrados en refrigeración</p>';
+                return;
+            }
+            
+            querySnapshot.forEach((doc) => {
+                const equipo = doc.data();
+                const div = document.createElement('div');
+                div.className = 'item-lista';
+                div.innerHTML = `
+                    <div class="item-info">
+                        <h3>${equipo.nombre}</h3>
+                        <p>Cliente: ${equipo.clienteNombre}</p>
+                        <p>Marca: ${equipo.marca} | Tipo: ${equipo.tipo || 'N/A'}</p>
+                        <p>Modelo: ${equipo.modelo} | Serie: ${equipo.serie}</p>
+                        <p>Capacidad: ${equipo.capacidad || 'N/A'} | Refrigerante: ${equipo.refrigerante || 'N/A'}</p>
+                        <p>Ubicación: ${equipo.ubicacion}</p>
+                    </div>
+                    <div class="item-acciones">
+                        <button onclick="editarEquipoRefrigeracion('${doc.id}')" class="btn-editar">Editar</button>
+                        <button onclick="eliminarEquipoRefrigeracion('${doc.id}')" class="btn-eliminar">Eliminar</button>
+                    </div>
+                `;
+                lista.appendChild(div);
+            });
+        })
+        .catch((error) => {
+            console.error('Error al cargar equipos de refrigeración:', error);
+        });
+}
+
+// Cargar clientes en selects de refrigeración
+function cargarClientesEnSelectsRefrigeracion() {
+    db.collection('clientes-refrigeracion').orderBy('nombre').get()
+        .then((querySnapshot) => {
+            const selectEquipo = document.getElementById('equipoClienteRefrigeracion');
+            const selectReporte = document.getElementById('reporteClienteRefrigeracion');
+            
+            selectEquipo.innerHTML = '<option value="">-- Seleccione un cliente --</option>';
+            selectReporte.innerHTML = '<option value="">-- Seleccione un cliente --</option>';
+            
+            querySnapshot.forEach((doc) => {
+                const cliente = doc.data();
+                const option1 = document.createElement('option');
+                const option2 = document.createElement('option');
+                
+                option1.value = doc.id;
+                option1.textContent = cliente.nombre;
+                option2.value = doc.id;
+                option2.textContent = cliente.nombre;
+                
+                selectEquipo.appendChild(option1);
+                selectReporte.appendChild(option2);
+            });
+        });
+}
+
+// Funciones de búsqueda para refrigeración
+function buscarClientesRefrigeracion(busqueda) {
+    // Implementar búsqueda similar a la de biomédico
+    console.log('Buscando clientes de refrigeración:', busqueda);
+}
+
+function buscarEquiposRefrigeracion(busqueda) {
+    // Implementar búsqueda similar a la de biomédico
+    console.log('Buscando equipos de refrigeración:', busqueda);
+}
+
+// Funciones de eliminación
+window.eliminarClienteRefrigeracion = function(id) {
+    if (!confirm('¿Está seguro de eliminar este cliente? También se eliminarán sus equipos.')) {
+        return;
+    }
+    
+    db.collection('equipos-refrigeracion').where('clienteId', '==', id).get()
+        .then((querySnapshot) => {
+            const batch = db.batch();
+            querySnapshot.forEach((doc) => {
+                batch.delete(doc.ref);
+            });
+            return batch.commit();
+        })
+        .then(() => {
+            return db.collection('clientes-refrigeracion').doc(id).delete();
+        })
+        .then(() => {
+            alert('Cliente eliminado');
+            cargarClientesRefrigeracion();
+            cargarEquiposRefrigeracion();
+            cargarClientesEnSelectsRefrigeracion();
+        })
+        .catch((error) => {
+            alert('Error al eliminar: ' + error.message);
+        });
+}
+
+window.eliminarEquipoRefrigeracion = function(id) {
+    if (!confirm('¿Está seguro de eliminar este equipo?')) {
+        return;
+    }
+    
+    db.collection('equipos-refrigeracion').doc(id).delete()
+        .then(() => {
+            alert('Equipo eliminado');
+            cargarEquiposRefrigeracion();
+        })
+        .catch((error) => {
+            alert('Error al eliminar: ' + error.message);
+        });
+}
+
+// Event listeners para formularios de refrigeración
+document.getElementById('formClienteRefrigeracion').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const cliente = {
+        nombre: document.getElementById('clienteNombreRefrigeracion').value.toUpperCase(),
+        direccion: document.getElementById('clienteDireccionRefrigeracion').value.toUpperCase(),
+        telefono: document.getElementById('clienteTelefonoRefrigeracion').value.toUpperCase(),
+        correo: document.getElementById('clienteCorreoRefrigeracion').value.toUpperCase(),
+        fechaCreacion: new Date()
+    };
+    
+    db.collection('clientes-refrigeracion').add(cliente)
+        .then(() => {
+            alert('Cliente agregado exitosamente');
+            e.target.reset();
+            cargarClientesRefrigeracion();
+            cargarClientesEnSelectsRefrigeracion();
+        })
+        .catch((error) => {
+            alert('Error al agregar cliente: ' + error.message);
+        });
+});
+
+document.getElementById('formEquipoRefrigeracion').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const clienteId = document.getElementById('equipoClienteRefrigeracion').value;
+    const clienteNombre = document.getElementById('equipoClienteRefrigeracion').selectedOptions[0].text;
+    
+    const equipo = {
+        clienteId: clienteId,
+        clienteNombre: clienteNombre,
+        nombre: document.getElementById('equipoNombreRefrigeracion').value.toUpperCase(),
+        marca: document.getElementById('equipoMarcaRefrigeracion').value.toUpperCase(),
+        tipo: document.getElementById('equipoTipoRefrigeracion').value.toUpperCase(),
+        modelo: document.getElementById('equipoModeloRefrigeracion').value.toUpperCase(),
+        serie: document.getElementById('equipoSerieRefrigeracion').value.toUpperCase(),
+        capacidad: document.getElementById('equipoCapacidadRefrigeracion').value.toUpperCase(),
+        refrigerante: document.getElementById('equipoRefrigeranteRefrigeracion').value.toUpperCase(),
+        ubicacion: document.getElementById('equipoUbicacionRefrigeracion').value.toUpperCase(),
+        fechaCreacion: new Date()
+    };
+    
+    db.collection('equipos-refrigeracion').add(equipo)
+        .then(() => {
+            alert('Equipo agregado exitosamente');
+            e.target.reset();
+            cargarEquiposRefrigeracion();
+        })
+        .catch((error) => {
+            alert('Error al agregar equipo: ' + error.message);
+        });
+});
+
+console.log('Funciones de refrigeración cargadas correctamente');
+// ============================================
+// GESTIÓN DE TÉCNICOS
+// ============================================
+
+// Cargar técnicos
+function cargarTecnicos() {
+    db.collection('tecnicos').orderBy('nombre').get()
+        .then((querySnapshot) => {
+            const lista = document.getElementById('listaTecnicos');
+            lista.innerHTML = '';
+            
+            if (querySnapshot.empty) {
+                lista.innerHTML = '<p class="texto-info">No hay técnicos registrados</p>';
+                return;
+            }
+            
+            querySnapshot.forEach((doc) => {
+                const tecnico = doc.data();
+                const div = document.createElement('div');
+                div.className = 'item-lista';
+                div.innerHTML = `
+                    <div class="item-info">
+                        <h3>${tecnico.nombre}</h3>
+                        <p>💼 Cargo: ${tecnico.cargo}</p>
+                        <p>📋 Registro INVIMA: ${tecnico.registroInvima}</p>
+                        ${tecnico.firma ? '<p>✍️ Firma registrada</p>' : '<p>⚠️ Sin firma</p>'}
+                    </div>
+                    <div class="item-acciones">
+                        <button onclick="editarTecnico('${doc.id}')" class="btn-editar">Editar</button>
+                        <button onclick="eliminarTecnico('${doc.id}')" class="btn-eliminar">Eliminar</button>
+                    </div>
+                `;
+                lista.appendChild(div);
+            });
+        })
+        .catch((error) => {
+            console.error('Error al cargar técnicos:', error);
+            alert('Error al cargar técnicos: ' + error.message);
+        });
+}
+
+// Preview de firma de técnico
+const inputFirmaTecnico = document.getElementById('tecnicoFirma');
+if (inputFirmaTecnico) {
+    inputFirmaTecnico.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        const preview = document.getElementById('firmaPreviewTecnico');
+        
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                preview.innerHTML = `<img src="${event.target.result}" alt="Firma preview">`;
+                preview.classList.remove('empty');
+            };
+            reader.readAsDataURL(file);
+        } else {
+            preview.innerHTML = '';
+            preview.classList.add('empty');
+        }
+    });
+}
+
+// Agregar técnico
+document.getElementById('formTecnico').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const nombre = document.getElementById('tecnicoNombre').value.toUpperCase();
+    const cargo = document.getElementById('tecnicoCargo').value.toUpperCase();
+    const registroInvima = document.getElementById('tecnicoRegistroInvima').value.toUpperCase();
+    const inputFirma = document.getElementById('tecnicoFirma');
+    
+    if (!inputFirma.files[0]) {
+        alert('Por favor seleccione una firma');
+        return;
+    }
+    
+    const reader = new FileReader();
+    reader.onload = function(event) {
+        const firmaBase64 = event.target.result;
+        
+        const tecnico = {
+            nombre: nombre,
+            cargo: cargo,
+            registroInvima: registroInvima,
+            firma: firmaBase64,
+            fechaCreacion: new Date()
+        };
+        
+        db.collection('tecnicos').add(tecnico)
+            .then(() => {
+                alert('Técnico agregado exitosamente');
+                document.getElementById('formTecnico').reset();
+                document.getElementById('firmaPreviewTecnico').innerHTML = '';
+                cargarTecnicos();
+                cargarTecnicosEnSelects(); // Actualizar los selects de reportes
+            })
+            .catch((error) => {
+                alert('Error al agregar técnico: ' + error.message);
+            });
+    };
+    
+    reader.readAsDataURL(inputFirma.files[0]);
+}); 
+
+// Eliminar técnico
+window.eliminarTecnico = function(id) {
+    if (!confirm('¿Está seguro de eliminar este técnico?')) {
+        return;
+    }
+    
+    db.collection('tecnicos').doc(id).delete()
+        .then(() => {
+            alert('Técnico eliminado');
+            cargarTecnicos();
+        })
+        .catch((error) => {
+            alert('Error al eliminar técnico: ' + error.message);
+        });
+}
+
+// Editar técnico (puedes implementar esto después)
+// Editar técnico
+window.editarTecnico = function(id) {
+    db.collection('tecnicos').doc(id).get()
+        .then((doc) => {
+            if (doc.exists) {
+                const tecnico = doc.data();
+                
+                document.getElementById('editTecnicoId').value = id;
+                document.getElementById('editTecnicoNombre').value = tecnico.nombre;
+                document.getElementById('editTecnicoCargo').value = tecnico.cargo;
+                document.getElementById('editTecnicoRegistroInvima').value = tecnico.registroInvima;
+                
+                // Mostrar firma actual si existe
+                if (tecnico.firma) {
+                    document.getElementById('editFirmaPreviewTecnico').innerHTML = 
+                        `<img src="${tecnico.firma}" alt="Firma actual">`;
+                } else {
+                    document.getElementById('editFirmaPreviewTecnico').innerHTML = '';
+                }
+                
+                document.getElementById('modalEditarTecnico').style.display = 'block';
+            }
+        })
+        .catch((error) => {
+            alert('Error al cargar técnico: ' + error.message);
+        });
+}
+
+// Cerrar modal técnico
+window.cerrarModalTecnico = function() {
+    document.getElementById('modalEditarTecnico').style.display = 'none';
+    document.getElementById('formEditarTecnico').reset();
+    document.getElementById('editFirmaPreviewTecnico').innerHTML = '';
+}
+
+// Preview firma al editar técnico
+const inputFirmaEditarTecnico = document.getElementById('editTecnicoFirma');
+if (inputFirmaEditarTecnico) {
+    inputFirmaEditarTecnico.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        const preview = document.getElementById('editFirmaPreviewTecnico');
+        
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                preview.innerHTML = `<img src="${event.target.result}" alt="Firma preview">`;
+                preview.classList.remove('empty');
+            };
+            reader.readAsDataURL(file);
+        } else {
+            preview.innerHTML = '';
+            preview.classList.add('empty');
+        }
+    });
+}
+
+// Guardar cambios técnico
+document.getElementById('formEditarTecnico').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const id = document.getElementById('editTecnicoId').value;
+    const tecnicoActualizado = {
+        nombre: document.getElementById('editTecnicoNombre').value.toUpperCase(),
+        cargo: document.getElementById('editTecnicoCargo').value.toUpperCase(),
+        registroInvima: document.getElementById('editTecnicoRegistroInvima').value.toUpperCase()
+    };
+    
+    const inputFirma = document.getElementById('editTecnicoFirma');
+    
+    if (inputFirma.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(event) {
+            tecnicoActualizado.firma = event.target.result;
+            
+            db.collection('tecnicos').doc(id).update(tecnicoActualizado)
+                .then(() => {
+                    alert('Técnico actualizado exitosamente');
+                    cerrarModalTecnico();
+                    cargarTecnicos();
+                    cargarTecnicosEnSelects();
+                })
+                .catch((error) => {
+                    alert('Error al actualizar: ' + error.message);
+                });
+        };
+        reader.readAsDataURL(inputFirma.files[0]);
+    } else {
+        db.collection('tecnicos').doc(id).update(tecnicoActualizado)
+            .then(() => {
+                alert('Técnico actualizado exitosamente');
+                cerrarModalTecnico();
+                cargarTecnicos();
+                cargarTecnicosEnSelects();
+            })
+            .catch((error) => {
+                alert('Error al actualizar: ' + error.message);
+            });
+    }
+});
+
+
+// Cargar técnicos en los selects de reportes
+function cargarTecnicosEnSelects() {
+    db.collection('tecnicos').orderBy('nombre').get()
+        .then((querySnapshot) => {
+            const selectBiomedico = document.getElementById('reporteTecnico');
+            const selectRefrigeracion = document.getElementById('reporteTecnicoRefrigeracion');
+            
+            if (selectBiomedico) {
+                selectBiomedico.innerHTML = '<option value="">-- Seleccione un técnico --</option>';
+            }
+            if (selectRefrigeracion) {
+                selectRefrigeracion.innerHTML = '<option value="">-- Seleccione un técnico --</option>';
+            }
+            
+            querySnapshot.forEach((doc) => {
+                const tecnico = doc.data();
+                
+                if (selectBiomedico) {
+                    const option1 = document.createElement('option');
+                    option1.value = doc.id;
+                    option1.textContent = `${tecnico.nombre} - ${tecnico.cargo}`;
+                    selectBiomedico.appendChild(option1);
+                }
+                
+                if (selectRefrigeracion) {
+                    const option2 = document.createElement('option');
+                    option2.value = doc.id;
+                    option2.textContent = `${tecnico.nombre} - ${tecnico.cargo}`;
+                    selectRefrigeracion.appendChild(option2);
+                }
+            });
+        })
+        .catch((error) => {
+            console.error('Error al cargar técnicos en selects:', error);
+        });
+}
+
+// ============================================
+// CARGAR EQUIPOS DINÁMICAMENTE EN REPORTES
+// ============================================
+// Para REFRIGERACIÓN
+window.cargarEquiposReporteRefrigeracion = function() {
+    const clienteId = document.getElementById('reporteClienteRefrigeracion').value;
+    const selectEquipo = document.getElementById('reporteEquipoRefrigeracion');
+    
+    if (!clienteId) {
+        selectEquipo.disabled = true;
+        selectEquipo.innerHTML = '<option value="">-- Primero seleccione un cliente --</option>';
+        return;
+    }
+    
+    selectEquipo.disabled = false;
+    selectEquipo.innerHTML = '<option value="">-- Cargando equipos... --</option>';
+    
+    db.collection('equipos-refrigeracion')
+        .where('clienteId', '==', clienteId)
+        .get()
+        .then((querySnapshot) => {
+            selectEquipo.innerHTML = '<option value="">-- Seleccione un equipo --</option>';
+            
+            if (querySnapshot.empty) {
+                selectEquipo.innerHTML = '<option value="">-- Este cliente no tiene equipos --</option>';
+                return;
+            }
+            
+                // Convertir a array y ordenar
+            const equipos = [];
+            querySnapshot.forEach((doc) => {
+                equipos.push({
+                    id: doc.id,
+                    data: doc.data()
+                });
+            });
+            
+            // Ordenar alfabéticamente por nombre
+            equipos.sort((a, b) => a.data.nombre.localeCompare(b.data.nombre));
+            
+            // Agregar al select
+            equipos.forEach((equipo) => {
+                const option = document.createElement('option');
+                option.value = equipo.id;
+                option.textContent = `${equipo.data.nombre} - ${equipo.data.marca} ${equipo.data.modelo}`;
+                selectEquipo.appendChild(option);
+            });
+        })
+        .catch((error) => {
+            console.error('Error al cargar equipos:', error);
+            selectEquipo.innerHTML = '<option value="">-- Error al cargar equipos --</option>';
+        });
+}
+
+console.log('Funciones de carga dinámica de equipos en reportes cargadas correctamente');
+
+// ============================================
+// EDICIÓN DE CLIENTES Y EQUIPOS - REFRIGERACIÓN
+// ============================================
+
+// Editar cliente refrigeración
+window.editarClienteRefrigeracion = function(id) {
+    db.collection('clientes-refrigeracion').doc(id).get()
+        .then((doc) => {
+            if (doc.exists) {
+                const cliente = doc.data();
+                
+                document.getElementById('editClienteIdRefrigeracion').value = id;
+                document.getElementById('editClienteNombreRefrigeracion').value = cliente.nombre;
+                document.getElementById('editClienteDireccionRefrigeracion').value = cliente.direccion;
+                document.getElementById('editClienteTelefonoRefrigeracion').value = cliente.telefono;
+                document.getElementById('editClienteCorreoRefrigeracion').value = cliente.correo || '';            
+                document.getElementById('modalEditarClienteRefrigeracion').style.display = 'block';
+            }
+        })
+        .catch((error) => {
+            alert('Error al cargar cliente: ' + error.message);
+        });
+}
+
+// Cerrar modal cliente refrigeración
+window.cerrarModalClienteRefrigeracion = function() {
+    document.getElementById('modalEditarClienteRefrigeracion').style.display = 'none';
+    document.getElementById('formEditarClienteRefrigeracion').reset();
+}
+
+// Editar equipo refrigeración
+window.editarEquipoRefrigeracion = function(id) {
+    db.collection('equipos-refrigeracion').doc(id).get()
+        .then((doc) => {
+            if (doc.exists) {
+                const equipo = doc.data();
+                
+                document.getElementById('editEquipoIdRefrigeracion').value = id;
+                document.getElementById('editEquipoNombreRefrigeracion').value = equipo.nombre;
+                document.getElementById('editEquipoMarcaRefrigeracion').value = equipo.marca;
+                document.getElementById('editEquipoTipoRefrigeracion').value = equipo.tipo || '';
+                document.getElementById('editEquipoModeloRefrigeracion').value = equipo.modelo;
+                document.getElementById('editEquipoSerieRefrigeracion').value = equipo.serie;
+                document.getElementById('editEquipoCapacidadRefrigeracion').value = equipo.capacidad || '';
+                document.getElementById('editEquipoRefrigeranteRefrigeracion').value = equipo.refrigerante || '';
+                document.getElementById('editEquipoUbicacionRefrigeracion').value = equipo.ubicacion;
+                // Cargar clientes en el select
+                return db.collection('clientes-refrigeracion').orderBy('nombre').get()
+                    .then((querySnapshot) => {
+                        const select = document.getElementById('editEquipoClienteRefrigeracion');
+                        select.innerHTML = '<option value="">-- Cliente --</option>';
+                        
+                        querySnapshot.forEach((clienteDoc) => {
+                            const cliente = clienteDoc.data();
+                            const option = document.createElement('option');
+                            option.value = clienteDoc.id;
+                            option.textContent = cliente.nombre;
+                            if (clienteDoc.id === equipo.clienteId) {
+                                option.selected = true;
+                            }
+                            select.appendChild(option);
+                        });
+                        
+                        document.getElementById('modalEditarEquipoRefrigeracion').style.display = 'block';
+                    });
+            }
+        })
+        .catch((error) => {
+            alert('Error al cargar equipo: ' + error.message);
+        });
+}
+
+// Cerrar modal equipo refrigeración
+window.cerrarModalEquipoRefrigeracion = function() {
+    document.getElementById('modalEditarEquipoRefrigeracion').style.display = 'none';
+    document.getElementById('formEditarEquipoRefrigeracion').reset();
+}
+
+// Guardar cambios cliente refrigeración
+document.getElementById('formEditarClienteRefrigeracion').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const id = document.getElementById('editClienteIdRefrigeracion').value;
+    const clienteActualizado = {
+        nombre: document.getElementById('editClienteNombreRefrigeracion').value.toUpperCase(),
+        direccion: document.getElementById('editClienteDireccionRefrigeracion').value.toUpperCase(),
+        telefono: document.getElementById('editClienteTelefonoRefrigeracion').value,
+        correo: document.getElementById('editClienteCorreoRefrigeracion').value
+    };
+    
+    db.collection('clientes-refrigeracion').doc(id).update(clienteActualizado)
+        .then(() => {
+            alert('Cliente actualizado exitosamente');
+            cerrarModalClienteRefrigeracion();
+            cargarClientesRefrigeracion();
+            cargarClientesEnSelectsRefrigeracion();
+        })
+        .catch((error) => {
+            alert('Error al actualizar: ' + error.message);
+        });
+    
+});
+
+// Guardar cambios equipo refrigeración
+document.getElementById('formEditarEquipoRefrigeracion').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const id = document.getElementById('editEquipoIdRefrigeracion').value;
+    const equipoActualizado = {
+        nombre: document.getElementById('editEquipoNombreRefrigeracion').value.toUpperCase(),
+        marca: document.getElementById('editEquipoMarcaRefrigeracion').value.toUpperCase(),
+        tipo: document.getElementById('editEquipoTipoRefrigeracion').value.toUpperCase(),
+        modelo: document.getElementById('editEquipoModeloRefrigeracion').value.toUpperCase(),
+        serie: document.getElementById('editEquipoSerieRefrigeracion').value.toUpperCase(),
+        capacidad: document.getElementById('editEquipoCapacidadRefrigeracion').value.toUpperCase(),
+        refrigerante: document.getElementById('editEquipoRefrigeranteRefrigeracion').value.toUpperCase(),
+        ubicacion: document.getElementById('editEquipoUbicacionRefrigeracion').value.toUpperCase()
+    };
+    
+    db.collection('equipos-refrigeracion').doc(id).update(equipoActualizado)
+        .then(() => {
+            alert('Equipo actualizado exitosamente');
+            cerrarModalEquipoRefrigeracion();
+            cargarEquiposRefrigeracion();
+        })
+        .catch((error) => {
+            alert('Error al actualizar: ' + error.message);
+        });
+});
+
+// ============================================
+// GENERAR PDF REPORTE - REFRIGERACIÓN
+// ============================================
+
+document.getElementById('formReporteRefrigeracion').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    await generarPDFRefrigeracion();
+});
+
+async function generarPDFRefrigeracion() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    
+    // Obtener IDs
+    const clienteId = document.getElementById('reporteClienteRefrigeracion').value;
+    const equipoId = document.getElementById('reporteEquipoRefrigeracion').value;
+    const tecnicoId = document.getElementById('reporteTecnicoRefrigeracion').value;
+    
+    if (!tecnicoId) {
+        alert('Por favor seleccione un técnico');
+        return;
+    }
+    
+    try {
+        // Obtener datos del cliente
+        const clienteDoc = await db.collection('clientes-refrigeracion').doc(clienteId).get();
+        const cliente = clienteDoc.data();
+        
+        // Obtener datos del equipo
+        const equipoDoc = await db.collection('equipos-refrigeracion').doc(equipoId).get();
+        const equipo = equipoDoc.data();
+        
+        // Obtener datos del técnico
+        const tecnicoDoc = await db.collection('tecnicos').doc(tecnicoId).get();
+        if (!tecnicoDoc.exists) {
+            alert('Error: No se encontró el técnico seleccionado');
+            return;
+        }
+        const tecnicoData = tecnicoDoc.data();
+        
+        // Obtener otros datos del formulario
+        const fecha = document.getElementById('reporteFechaRefrigeracion').value;
+        const servicioPor = document.querySelector('input[name="servicioPorRefrigeracion"]:checked').value;
+        const tipoMto = document.querySelector('input[name="tipoMtoRefrigeracion"]:checked').value;
+        const estadoEquipo = document.querySelector('input[name="estadoEquipoRefrigeracion"]:checked').value;
+        const actividadMantenimiento = document.getElementById('actividadMantenimientoRefrigeracion').value;
+        const observaciones = document.getElementById('observacionesRefrigeracion').value;
+        
+        // Construir PDF
+        await construirPDFRefrigeracion(doc, {
+            cliente,
+            equipo,
+            fecha,
+            servicioPor,
+            tipoMto,
+            estadoEquipo,
+            actividadMantenimiento,
+            observaciones,
+            tecnicoData
+        });
+        
+    } catch (error) {
+        alert('Error al generar PDF: ' + error.message);
+        console.error('Error:', error);
+    }
+}
+
+async function construirPDFRefrigeracion(doc, datos) {
+    const pageWidth = 210;
+    const pageHeight = 297;
+    const margin = 15;
+    
+    // Colores
+    const colorAzulClaro = [216, 232, 247];
+    const colorVerdeClaro = [220, 247, 235]; // Color alternativo para refrigeración
+    
+    // Obtener logo de la empresa
+    let logoBase64 = null;
+    try {
+        const cfg = await db.collection('configuracion').doc('empresa').get();
+        if (cfg.exists) {
+            const c = cfg.data();
+            if (c.logo) {
+                logoBase64 = c.logo;
+            }
+        }
+    } catch (error) {
+        console.log('No se pudo cargar el logo');
+    }
+    
+    let y = margin;
+    
+    // ======================
+    // ENCABEZADO
+    // ======================
+    
+    // Logo de la empresa (lado izquierdo)
+    if (logoBase64) {
+        try {
+            doc.addImage(logoBase64, 'PNG', margin, y, 40, 20);
+        } catch (e) {
+            console.log('Error al cargar logo de empresa');
+        }
+    }
+    
+    // Logo del cliente (lado derecho)
+    if (datos.cliente.logoBase64) {
+        try {
+            doc.addImage(datos.cliente.logoBase64, 'PNG', pageWidth - margin - 40, y, 40, 20);
+        } catch (e) {
+            console.log('Error al cargar logo del cliente');
+        }
+    }
+    
+    y += 25;
+    
+    // Título principal
+    doc.setFontSize(16);
+    doc.setFont(undefined, 'bold');
+    doc.text('REPORTE DE SERVICIO - REFRIGERACIÓN', pageWidth / 2, y, { align: 'center' });
+    
+    y += 10;
+    
+    // ======================
+    // INFORMACIÓN DEL CLIENTE
+    // ======================
+    
+    doc.setFillColor(colorAzulClaro[0], colorAzulClaro[1], colorAzulClaro[2]);
+    doc.roundedRect(margin, y, pageWidth - 2 * margin, 25, 3, 3, 'F');
+    doc.setDrawColor(150, 150, 150);
+    doc.roundedRect(margin, y, pageWidth - 2 * margin, 25, 3, 3, 'S');
+    
+    doc.setFontSize(9);
+    doc.setFont(undefined, 'bold');
+    doc.text('INFORMACIÓN DEL CLIENTE', margin + 3, y + 5);
+    
+    doc.setFontSize(8);
+    doc.setFont(undefined, 'normal');
+    doc.text(`CLIENTE: ${datos.cliente.nombre}`, margin + 3, y + 10);
+    doc.text(`DIRECCIÓN: ${datos.cliente.direccion}`, margin + 3, y + 14);
+    doc.text(`TELÉFONO: ${datos.cliente.telefono}`, margin + 3, y + 18);
+    doc.text(`FECHA: ${datos.fecha}`, margin + 3, y + 22);
+    
+    y += 28;
+    
+    // ======================
+    // INFORMACIÓN DEL EQUIPO
+    // ======================
+    
+    doc.setFillColor(colorVerdeClaro[0], colorVerdeClaro[1], colorVerdeClaro[2]);
+    doc.roundedRect(margin, y, pageWidth - 2 * margin, 35, 3, 3, 'F');
+    doc.setDrawColor(150, 150, 150);
+    doc.roundedRect(margin, y, pageWidth - 2 * margin, 35, 3, 3, 'S');
+    
+    doc.setFontSize(9);
+    doc.setFont(undefined, 'bold');
+    doc.text('INFORMACIÓN DEL EQUIPO', margin + 3, y + 5);
+    
+    doc.setFontSize(8);
+    doc.setFont(undefined, 'normal');
+    doc.text(`EQUIPO: ${datos.equipo.nombre}`, margin + 3, y + 10);
+    doc.text(`MARCA: ${datos.equipo.marca}`, margin + 3, y + 14);
+    doc.text(`TIPO: ${datos.equipo.tipo || 'N/A'}`, margin + 3, y + 18);
+    doc.text(`MODELO: ${datos.equipo.modelo}`, margin + 3, y + 22);
+    
+    doc.text(`SERIE: ${datos.equipo.serie}`, margin + 95, y + 10);
+    doc.text(`CAPACIDAD: ${datos.equipo.capacidad || 'N/A'}`, margin + 95, y + 14);
+    doc.text(`REFRIGERANTE: ${datos.equipo.refrigerante || 'N/A'}`, margin + 95, y + 18);
+    doc.text(`UBICACIÓN: ${datos.equipo.ubicacion}`, margin + 95, y + 22);
+    
+    y += 38;
+    
+    // ======================
+    // TIPO DE SERVICIO
+    // ======================
+    
+    doc.setFillColor(colorAzulClaro[0], colorAzulClaro[1], colorAzulClaro[2]);
+    doc.roundedRect(margin, y, pageWidth - 2 * margin, 15, 3, 3, 'F');
+    doc.setDrawColor(150, 150, 150);
+    doc.roundedRect(margin, y, pageWidth - 2 * margin, 15, 3, 3, 'S');
+    
+    doc.setFontSize(9);
+    doc.setFont(undefined, 'bold');
+    doc.text('TIPO DE SERVICIO', margin + 3, y + 5);
+    
+    doc.setFontSize(8);
+    doc.setFont(undefined, 'normal');
+    doc.text(`SERVICIO POR: ${datos.servicioPor}`, margin + 3, y + 10);
+    doc.text(`TIPO DE MANTENIMIENTO: ${datos.tipoMto}`, margin + 60, y + 10);
+    
+    y += 18;
+    
+    // ======================
+    // ESTADO DEL EQUIPO
+    // ======================
+    
+    doc.setFillColor(colorAzulClaro[0], colorAzulClaro[1], colorAzulClaro[2]);
+    doc.roundedRect(margin, y, pageWidth - 2 * margin, 12, 3, 3, 'F');
+    doc.setDrawColor(150, 150, 150);
+    doc.roundedRect(margin, y, pageWidth - 2 * margin, 12, 3, 3, 'S');
+    
+    doc.setFontSize(9);
+    doc.setFont(undefined, 'bold');
+    doc.text('ESTADO DEL EQUIPO', margin + 3, y + 5);
+    
+    doc.setFontSize(8);
+    doc.setFont(undefined, 'normal');
+    doc.text(`${datos.estadoEquipo}`, margin + 3, y + 9);
+    
+    y += 15;
+    
+    // ======================
+    // ACTIVIDAD DE MANTENIMIENTO
+    // ======================
+    
+    doc.setFillColor(colorAzulClaro[0], colorAzulClaro[1], colorAzulClaro[2]);
+    const actividadHeight = Math.max(30, Math.ceil(datos.actividadMantenimiento.length / 80) * 5 + 10);
+    doc.roundedRect(margin, y, pageWidth - 2 * margin, actividadHeight, 3, 3, 'F');
+    doc.setDrawColor(150, 150, 150);
+    doc.roundedRect(margin, y, pageWidth - 2 * margin, actividadHeight, 3, 3, 'S');
+    
+    doc.setFontSize(9);
+    doc.setFont(undefined, 'bold');
+    doc.text('ACTIVIDAD DE MANTENIMIENTO', margin + 3, y + 5);
+    
+    doc.setFontSize(8);
+    doc.setFont(undefined, 'normal');
+    const actividadLines = doc.splitTextToSize(datos.actividadMantenimiento, pageWidth - 2 * margin - 10);
+    doc.text(actividadLines, margin + 3, y + 10);
+    
+    y += actividadHeight + 3;
+    
+    // ======================
+    // OBSERVACIONES
+    // ======================
+    
+    if (datos.observaciones) {
+        doc.setFillColor(colorAzulClaro[0], colorAzulClaro[1], colorAzulClaro[2]);
+        const observacionesHeight = Math.max(20, Math.ceil(datos.observaciones.length / 80) * 5 + 10);
+        doc.roundedRect(margin, y, pageWidth - 2 * margin, observacionesHeight, 3, 3, 'F');
+        doc.setDrawColor(150, 150, 150);
+        doc.roundedRect(margin, y, pageWidth - 2 * margin, observacionesHeight, 3, 3, 'S');
+        
+        doc.setFontSize(9);
+        doc.setFont(undefined, 'bold');
+        doc.text('OBSERVACIONES', margin + 3, y + 5);
+        
+        doc.setFontSize(8);
+        doc.setFont(undefined, 'normal');
+        const observacionesLines = doc.splitTextToSize(datos.observaciones, pageWidth - 2 * margin - 10);
+        doc.text(observacionesLines, margin + 3, y + 10);
+        
+        y += observacionesHeight + 3;
+    }
+    
+    // ======================
+    // FIRMAS
+    // ======================
+    
+    // Verificar si hay espacio suficiente
+    if (y > pageHeight - 50) {
+        doc.addPage();
+        y = margin;
+    }
+    
+    const firmaHeight = 30;
+    const col1Width = 90;
+    const col2Width = 90;
+    const col1X = margin;
+    const col2X = margin + col1Width + 5;
+    
+    // SERVICIO REALIZADO POR
+    doc.setFillColor(colorAzulClaro[0], colorAzulClaro[1], colorAzulClaro[2]);
+    doc.roundedRect(margin, y, col1Width, firmaHeight, 3, 3, 'F');
+    doc.setDrawColor(150, 150, 150);
+    doc.roundedRect(margin, y, col1Width, firmaHeight, 3, 3, 'S');
+    
+    doc.setFontSize(8);
+    doc.setFont(undefined, 'bold');
+    doc.text('SERVICIO REALIZADO POR:', margin + 3, y + 5);
+    
+    doc.setFontSize(7);
+    doc.setFont(undefined, 'normal');
+    doc.text(datos.tecnicoData.nombre, margin + 3, y + 11);
+    doc.text(datos.tecnicoData.cargo, margin + 3, y + 15);
+    doc.text(`REG INVIMA ${datos.tecnicoData.registroInvima}`, margin + 3, y + 19);
+    
+    // Agregar firma del técnico
+    if (datos.tecnicoData.firma) {
+        try {
+            doc.addImage(datos.tecnicoData.firma, 'PNG', margin + 50, y + 9, 30, 14);
+        } catch (e) {
+            console.log('Error cargando firma del técnico');
+        }
+    }
+    
+    doc.setDrawColor(0, 0, 0);
+    doc.setLineWidth(0.3);
+    doc.line(col1X + 45, y + 24, col1X + col1Width - 10, y + 24);
+    
+    doc.setFontSize(6);
+    doc.text('FIRMA', margin + 57, y + 27);
+    
+    // SERVICIO RECIBIDO Y APROBADO POR
+    doc.setFillColor(colorAzulClaro[0], colorAzulClaro[1], colorAzulClaro[2]);
+    doc.roundedRect(col2X, y, col2Width, firmaHeight, 3, 3, 'F');
+    doc.setDrawColor(150, 150, 150);
+    doc.roundedRect(col2X, y, col2Width, firmaHeight, 3, 3, 'S');
+    
+    doc.setFontSize(8);
+    doc.setFont(undefined, 'bold');
+    doc.text('SERVICIO RECIBIDO Y APROBADO', col2X + 3, y + 5);
+    
+    // Línea para firma
+    doc.setDrawColor(0, 0, 0);
+    doc.setLineWidth(0.3);
+    doc.line(col2X + 10, y + 24, col2X + col2Width - 10, y + 24);
+    
+    doc.setFontSize(6);
+    doc.setFont(undefined, 'normal');
+    doc.text('FIRMA', col2X + (col2Width / 2) - 4, y + 27);
+    
+    // ======================
+    // EVIDENCIA FOTOGRÁFICA (si hay)
+    // ======================
+    
+    const fotosInput = document.getElementById('fotosRefrigeracion');
+    if (fotosInput && fotosInput.files.length > 0) {
+        doc.addPage();
+        let yFoto = margin + 10;
+        
+        doc.setFontSize(12);
+        doc.setFont(undefined, 'bold');
+        doc.text('EVIDENCIA FOTOGRÁFICA', pageWidth / 2, yFoto, { align: 'center' });
+        
+        yFoto += 10;
+        
+        let xFoto = margin;
+        let fotosPorFila = 0;
+        
+        for (let i = 0; i < fotosInput.files.length; i++) {
+            const file = fotosInput.files[i];
+            const reader = new FileReader();
+            
+            await new Promise((resolve) => {
+                reader.onload = function(e) {
+                    const imgData = e.target.result;
+                    
+                    if (yFoto > pageHeight - 100) {
+                        doc.addPage();
+                        yFoto = margin + 10;
+                        xFoto = margin;
+                        fotosPorFila = 0;
+                    }
+                    
+                    try {
+                        doc.addImage(imgData, 'JPEG', xFoto, yFoto, 85, 75);
+                    } catch (err) {
+                        console.log('Error al agregar imagen');
+                    }
+                    
+                    fotosPorFila++;
+                    
+                    if (fotosPorFila === 2) {
+                        yFoto += 80;
+                        xFoto = margin;
+                        fotosPorFila = 0;
+                    } else {
+                        xFoto += 90;
+                    }
+                    
+                    resolve();
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+    }
+    
+    // Guardar PDF
+    const nombreArchivo = `Reporte_Refrigeracion_${datos.cliente.nombre}_${datos.fecha}.pdf`;
+    doc.save(nombreArchivo);
+}
+
+console.log('Funciones de generación de PDF para refrigeración cargadas correctamente');
