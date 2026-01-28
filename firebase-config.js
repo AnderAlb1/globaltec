@@ -11,8 +11,29 @@ const firebaseConfig = {
 // Inicializar Firebase
 firebase.initializeApp(firebaseConfig);
 
+// Inicializar Firebase
+firebase.initializeApp(firebaseConfig);
+
 // Inicializar Firestore
 const db = firebase.firestore();
 const auth = firebase.auth();
+
+// Configurar persistencia de auth para móviles
+auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
+    .then(() => {
+        console.log("Persistencia de auth configurada");
+    })
+    .catch((error) => {
+        console.error("Error al configurar persistencia:", error);
+    });
+
+// Deshabilitar sincronización automática en background (opcional)
+db.disableNetwork()
+    .then(() => {
+        return db.enableNetwork();
+    })
+    .then(() => {
+        console.log("Red de Firestore reconfigurada");
+    });
 
 console.log("Firebase inicializado correctamente");
