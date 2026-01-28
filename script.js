@@ -3421,4 +3421,180 @@ async function construirPDFRefrigeracion(doc, datos) {
     doc.save(nombreArchivo);
 }
 
-console.log('Funciones de generación de PDF para refrigeración cargadas correctamente');
+// ============================================
+// IMPORTAR EQUIPOS DESDE EXCEL - REFRIGERACIÓN
+// ============================================
+
+// Mostrar formulario manual
+window.mostrarFormularioManual = function() {
+    document.getElementById('formEquipoRefrigeracion').style.display = 'block';
+    document.getElementById('formularioExcelRefrigeracion').style.display = 'none';
+    
+    // Actualizar botones activos
+    document.getElementById('ImportarManualRefrigeracion').classList.add('activo');
+    document.getElementById('importarExcelRefrigeracion').classList.remove('activo');
+}
+
+// Mostrar formulario Excel
+window.mostrarFormularioExcel = function() {
+    document.getElementById('formEquipoRefrigeracion').style.display = 'none';
+    document.getElementById('formularioExcelRefrigeracion').style.display = 'block';
+    
+    // Actualizar botones activos
+    document.getElementById('ImportarManualRefrigeracion').classList.remove('activo');
+    document.getElementById('importarExcelRefrigeracion').classList.add('activo');
+}
+
+// Variable global para almacenar equipos leídos del Excel
+let equiposDesdeExcelRefrigeracion = [];
+
+// Detectar cuando se selecciona un archivo
+document.addEventListener('DOMContentLoaded', function() {
+    const inputExcelRefrig = document.getElementById('archivoExcelRefrigeracion');
+    if (inputExcelRefrig) {
+        inputExcelRefrig.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                leerArchivoExcelRefrigeracion(file);
+            }
+        });
+    }
+});
+
+async function leerArchivoExcelRefrigeracion(file) {
+    try {
+        const data = await file.arrayBuffer();
+        const workbook = XLSX.read(data);
+        const primeraHoja = workbook.Sheets[workbook.SheetNames[0]];
+        const datos = XLSX.utils.sheet_to_json(primeraHoja, { header: 1 });
+        
+        // Omitir primera fila si parece ser encabezado
+        const filas = datos[0] && typeof datos[0][0] === 'string' ? datos.slice(1) : datos;
+        
+        equiposDesdeExcelRefrigeracion = [];
+        
+        filas.forEach((fila, index) => {
+            // Saltar filas vacías
+            if (!fila || !fila[0]) return;
+            
+            const equipo = {
+                nombre: (fila[0] || '').toString().trim().toUpperCase(),
+                marca: (fila[1] || '').toString().trim().toUpperCase(),
+                tipo: (fila[2] || '').toString().trim().toUpperCase() || 'N/A',
+                modelo: (fila[3] || '').toString().trim().toUpperCase(),
+                serie: (fila[4] || '').toString().trim().toUpperCase(),
+                capacidad: (fila[5] || '').toString().trim().toUpperCase() || 'N/A',
+                refrigerante: (fila[6] || '').toString().trim().toUpperCase() || 'N/A',
+                ubicacion: (fila[7] || '').toString().trim().toUpperCase() || 'N/A'
+            };
+            
+            // Solo agregar si tiene al menos nombre, marca, modelo y serie
+            if (equipo.nombre && equipo.marca && equipo.modelo && equipo.serie) {
+                equiposDesdeExcelRefrigeracion.push(equipo);
+            }
+        });
+        
+        mostrarVistaPreviaRefrigeracion();
+        document.getElementById('btnProcesarExcelRefrigeracion').disabled = equiposDesdeExcelRefrigeracion.length === 0;
+        
+    } catch (error) {
+        alert('Error al leer el archivo Excel: ' + error.message);
+        console.error(error);
+    }
+}
+
+function mostrarVistaPreviaRefrigeracion() {
+    const vistaPrevia = document.getElementById('vistaPreviaRefrigeracion');
+    const contenido = document.getElementById('contenidoVistaPreviaRefrigeracion');
+    
+    if (equiposDesdeExcelRefrigeracion.length === 0) {
+        vistaPrevia.style.display = 'none';
+        return;
+    }
+    
+    vistaPrevia.style.display = 'block';
+    
+    let html = `<p><strong>Total de equipos encontrados: ${equiposDesdeExcelRefrigeracion.length}</strong></p>`;
+    
+    equiposDesdeExcelRefrigeracion.forEach((eq, i) => {
+        html += `
+            <div style="padding: 8px; margin: 5px 0; background: white; border-left: 3px solid #10b981; border-radius: 3px;">
+                <strong>${i + 1}. ${eq.nombre}</strong> - ${eq.marca} (${eq.tipo})<br>
+                <small>Modelo: ${eq.modelo} | Serie: ${eq.serie}</small><br>
+                <small>Capacidad: ${eq.capacidad} | Refrigerante: ${eq.refrigerante}</small><br>
+                <small>Ubicación: ${eq.ubicacion}</small>
+            </div>
+        `;
+    });
+    
+    contenido.innerHTML = html;
+}
+
+window.procesarExcelRefrigeracion = async function() {
+    const clienteId = document.getElementById('equipoClienteRefrigeracion').value;
+    
+    if (!clienteId) {
+        alert('Por favor seleccione un cliente primero');
+        return;
+    }
+    
+    if (equiposDesdeExcelRefrigeracion.length === 0) {
+        alert('No hay equipos para procesar');
+        return;
+    }
+    
+    if (!confirm(`¿Desea agregar ${equiposDesdeExcelRefrigeracion.length} equipos al cliente seleccionado?`)) {
+        return;
+    }
+    
+    const btnProcesar = document.getElementById('btnProcesarExcelRefrigeracion');
+    const textoOriginal = btnProcesar.textContent;
+    btnProcesar.disabled = true;
+    btnProcesar.textContent = 'Procesando...';
+    
+    let exitosos = 0;
+    let fallidos = 0;
+    
+    // Obtener nombre del cliente
+    const clienteNombre = document.getElementById('equipoClienteRefrigeracion').selectedOptions[0].text;
+    
+    for (const equipo of equiposDesdeExcelRefrigeracion) {
+        try {
+            await db.collection('equipos-refrigeracion').add({
+                clienteId: clienteId,
+                clienteNombre: clienteNombre,
+                nombre: equipo.nombre,
+                marca: equipo.marca,
+                tipo: equipo.tipo,
+                modelo: equipo.modelo,
+                serie: equipo.serie,
+                capacidad: equipo.capacidad,
+                refrigerante: equipo.refrigerante,
+                ubicacion: equipo.ubicacion,
+                fechaCreacion: new Date(),
+                importadoDesdeExcel: true,
+                creadoPor: usuarioActual.email
+            });
+            exitosos++;
+        } catch (error) {
+            console.error('Error al agregar equipo:', equipo.nombre, error);
+            fallidos++;
+        }
+    }
+    
+    alert(`✅ Proceso completado:\n\n✓ ${exitosos} equipos agregados exitosamente${fallidos > 0 ? `\n✗ ${fallidos} equipos fallaron` : ''}`);
+    
+    // Limpiar y recargar
+    document.getElementById('archivoExcelRefrigeracion').value = '';
+    equiposDesdeExcelRefrigeracion = [];
+    document.getElementById('vistaPrevia').style.display = 'none';
+    btnProcesar.disabled = true;
+    btnProcesar.textContent = textoOriginal;
+    
+    cargarEquiposRefrigeracion();
+    
+    // Volver al formulario manual
+    mostrarFormularioManual();
+}
+
+console.log('Funciones de importación Excel para refrigeración cargadas correctamente');
