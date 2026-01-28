@@ -955,3 +955,240 @@ button[type="submit"]:disabled {
   padding: 5px;
 }
 
+/* ============================================
+   BOTONES DE MODO DE EQUIPO
+   ============================================ */
+
+.btn-modo-equipo {
+    flex: 1;
+    padding: 12px;
+    background-color: #e0e0e0;
+    color: #555;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.btn-modo-equipo:hover {
+    background-color: #d0d0d0;
+}
+
+.btn-modo-equipo.activo {
+    background-color: #4CAF50;
+    color: white;
+    border-color: #45a049;
+}
+
+
+
+#btnProcesarExcel:hover:not(:disabled) {
+    background-color: #45a049;
+}
+
+#btnProcesarExcel:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+/* ============================================
+   PESTAÑAS SUPERIORES
+   ============================================ */
+
+.pestanas-superiores {
+    position: fixed;
+    top: 60px;
+    left: 250px;
+    right: 0;
+    height: 60px;
+    background: white;
+    display: flex;
+    align-items: stretch;
+    padding: 0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+    z-index: 900;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.pestaña-btn {
+    flex: 1;
+    background: transparent;
+    color: #666;
+    border: none;
+    border-bottom: 3px solid transparent;
+    cursor: pointer;
+    font-size: 15px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 0 20px;
+    position: relative;
+}
+
+.pestaña-btn:hover {
+    background: #f8f9fa;
+    color: #333;
+}
+
+.pestaña-btn.activa {
+    color: #4CAF50;
+    border-bottom-color: #4CAF50;
+    background: white;
+}
+
+.pestaña-btn .icon {
+    font-size: 20px;
+}
+
+/* Ajustar contenido principal cuando hay pestañas */
+.contenido-principal.con-pestanas {
+    margin-top: 120px;
+}
+
+/* ============================================
+   RESPONSIVE PARA PESTAÑAS
+   ============================================ */
+
+@media (max-width: 1024px) {
+    .pestanas-superiores {
+        left: 0;
+        top: 60px;
+    }
+    
+    .pestaña-btn {
+        font-size: 14px;
+        padding: 0 15px;
+    }
+}
+
+@media (max-width: 768px) {
+    .pestaña-btn {
+        font-size: 13px;
+        padding: 0 10px;
+        gap: 6px;
+    }
+    
+    .pestaña-btn .icon {
+        font-size: 18px;
+    }
+}
+
+@media (max-width: 480px) {
+    .pestaña-btn {
+        font-size: 12px;
+        flex-direction: column;
+        gap: 4px;
+        padding: 10px 5px;
+    }
+    
+    .pestaña-btn .icon {
+        font-size: 16px;
+    }
+}
+/* ============================================
+   PESTAÑAS DE CONFIGURACIÓN
+   ============================================ */
+
+.pestanas-configuracion {
+    position: fixed;
+    top: 60px;
+    left: 250px;
+    right: 0;
+    height: 60px;
+    background: white;
+    display: flex;
+    align-items: stretch;
+    padding: 0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+    z-index: 900;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.pestaña-config-btn {
+    flex: 1;
+    background: transparent;
+    color: #666;
+    border: none;
+    border-bottom: 3px solid transparent;
+    cursor: pointer;
+    font-size: 15px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 0 20px;
+    position: relative;
+}
+
+.pestaña-config-btn:hover {
+    background: #f8f9fa;
+    color: #333;
+}
+
+.pestaña-config-btn.activa {
+    color: #4CAF50;
+    border-bottom-color: #4CAF50;
+    background: white;
+}
+
+.pestaña-config-btn .icon {
+    font-size: 20px;
+}
+
+/* Ocultar subsecciones por defecto */
+.config-subseccion.oculto {
+    display: none;
+}
+
+/* Ajustar contenido cuando hay pestañas de configuración */
+.contenido-principal.con-pestanas-config {
+    margin-top: 120px;
+}
+
+/* ============================================
+   RESPONSIVE PARA PESTAÑAS DE CONFIGURACIÓN
+   ============================================ */
+
+@media (max-width: 1024px) {
+    .pestanas-configuracion {
+        left: 0;
+        top: 60px;
+    }
+    
+    .pestaña-config-btn {
+        font-size: 14px;
+        padding: 0 15px;
+    }
+}
+
+@media (max-width: 768px) {
+    .pestaña-config-btn {
+        font-size: 13px;
+        padding: 0 10px;
+        gap: 6px;
+    }
+    
+    .pestaña-config-btn .icon {
+        font-size: 18px;
+    }
+}
+
+@media (max-width: 480px) {
+    .pestaña-config-btn {
+        font-size: 12px;
+        flex-direction: column;
+        gap: 4px;
+        padding: 10px 5px;
+    }
+    
+    .pestaña-config-btn .icon {
+        font-size: 16px;
+    }
+}
