@@ -36,7 +36,13 @@ auth.onAuthStateChanged((user) => {
         }, 100);
 
         setTimeout(() => {
-            mostrarSeccion(ultimaSeccionAbierta);
+            // Si la última sección era configuración, mostrarla
+            if (ultimaSeccionAbierta === 'configuracion') {
+                mostrarSeccion('configuracion');
+            } else {
+                // Si no, mostrar servicio biomédico por defecto
+                mostrarServicio('biomedico');
+            }
             
             document.getElementById("menuLateral").classList.remove("activo");
             document.getElementById("menuOverlay").classList.remove("activo");
