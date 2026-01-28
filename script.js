@@ -3426,7 +3426,7 @@ async function construirPDFRefrigeracion(doc, datos) {
 // ============================================
 
 // Mostrar formulario manual
-window.mostrarFormularioManual = function() {
+window.mostrarFormularioManualRefrigeracion = function() {
     document.getElementById('formEquipoRefrigeracion').style.display = 'block';
     document.getElementById('formularioExcelRefrigeracion').style.display = 'none';
     
@@ -3436,7 +3436,7 @@ window.mostrarFormularioManual = function() {
 }
 
 // Mostrar formulario Excel
-window.mostrarFormularioExcel = function() {
+window.mostrarFormularioExcelRefrigeracion = function() {
     document.getElementById('formEquipoRefrigeracion').style.display = 'none';
     document.getElementById('formularioExcelRefrigeracion').style.display = 'block';
     
@@ -3594,7 +3594,7 @@ window.procesarExcelRefrigeracion = async function() {
     cargarEquiposRefrigeracion();
     
     // Volver al formulario manual
-    mostrarFormularioManual();
+    mostrarFormularioManualRefrigeracion();
 }
 
 console.log('Funciones de importación Excel para refrigeración cargadas correctamente');
