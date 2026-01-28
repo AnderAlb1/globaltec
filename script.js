@@ -15,7 +15,8 @@ let servicioActual = 'biomedico'; // Puede ser 'biomedico' o 'refrigeracion'
 // AUTENTICACIÓN
 // ============================================
 
-let ultimaSeccionAbierta = localStorage.getItem("ultimaSeccion");
+let ultimaSeccionAbierta = localStorage.getItem("ultimaSeccion") || 'biomedico';
+let ultimaSeccionServicio = localStorage.getItem("ultimaSeccionServicio") || 'biomedico';
 
 
 // Verificar si hay sesión guardada al cargar
@@ -40,8 +41,9 @@ auth.onAuthStateChanged((user) => {
             if (ultimaSeccionAbierta === 'configuracion') {
                 mostrarSeccion('configuracion');
             } else {
-                // Si no, mostrar servicio biomédico por defecto
-                mostrarServicio('biomedico');
+                // Restaurar el servicio anterior (biomedico o refrigeracion)
+                const servicio = ultimaSeccionServicio || 'biomedico';
+                mostrarServicio(servicio);
             }
             
             document.getElementById("menuLateral").classList.remove("activo");
@@ -235,6 +237,9 @@ document.addEventListener('DOMContentLoaded', function() {
 // ============================================
 
 window.mostrarSeccion = function(seccion) {
+
+    localStorage.setItem('ultimaSeccion', seccion);
+
     // Si es configuración, ocultar pestañas de servicios y mostrar pestañas de configuración
     if (seccion === 'configuracion') {
         document.getElementById('pestanasSuperiores').style.display = 'none';
@@ -269,6 +274,16 @@ window.mostrarSeccion = function(seccion) {
 window.mostrarServicio = function(servicio) {
     servicioActual = servicio;
     
+    // Guardar el servicio actual
+    localStorage.setItem('ultimaSeccionServicio', servicio);
+    localStorage.removeItem('ultimaSeccion'); // Limpiar para evitar confusión
+    
+    // Actualizar botones del menú lateral
+    document.querySelectorAll('.btn-menu-lateral').forEach(btn => {
+        btn.classList.remove('activo');
+    });
+    document.querySelector(`.btn-menu-lateral[data-servicio="${servicio}"]`).classList.add('activo');
+
     // Actualizar botones del menú lateral
     document.querySelectorAll('.btn-menu-lateral').forEach(btn => {
         btn.classList.remove('activo');
