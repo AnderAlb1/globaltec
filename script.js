@@ -18,7 +18,7 @@ let servicioActual = 'biomedico'; // Puede ser 'biomedico' o 'refrigeracion'
 let ultimaSeccionAbierta = localStorage.getItem("ultimaSeccion") || 'biomedico';
 let ultimaSeccionServicio = localStorage.getItem("ultimaSeccionServicio") || 'biomedico';
 
-
+let appInicializada = false;
 // Verificar si hay sesión guardada al cargar
 auth.onAuthStateChanged((user) => {
     if (user) {
@@ -27,7 +27,7 @@ auth.onAuthStateChanged((user) => {
         
         // Primero mostrar la app (sin el blur)
         mostrarAppPrincipal();
-        
+        appInicializada = true;
         // Luego ocultar la pantalla de carga para ver el blur sobre la app
         setTimeout(() => {
             document.getElementById("pantalla-cargando").style.opacity = "0";
@@ -573,8 +573,10 @@ document.getElementById('formEquipo').addEventListener('submit', function(e) {
     const accesoriosTexto = document.getElementById('equipoAccesorios').value;
     const accesoriosArray = accesoriosTexto ? accesoriosTexto.split(',').map(a => a.trim()) : [];
     
+    const clienteId = document.getElementById('equipoCliente').value;
+
     const equipo = {
-        clienteId: document.getElementById('equipoCliente').value,
+        clienteId: clienteId,
         nombre: document.getElementById('equipoNombre').value,
         marca: document.getElementById('equipoMarca').value,
         modelo: document.getElementById('equipoModelo').value,
@@ -584,6 +586,12 @@ document.getElementById('formEquipo').addEventListener('submit', function(e) {
         fechaCreacion: firebase.firestore.FieldValue.serverTimestamp(),
         creadoPor: usuarioActual.email
     };
+
+    // Validar que se haya seleccionado un cliente
+    if (!clienteId) {
+        mostrarToast('Por favor seleccione un cliente', 'Error');
+        return;
+    }
     
     db.collection('equipos').add(equipo)
         .then(() => {
@@ -1235,10 +1243,6 @@ async function construirPDF(doc, datos) {
     const colorAzulClaro = [216, 232, 247];
     const colorNegro = [0, 0, 0];
     const colorGrisOscuro = [50, 50, 50];
-    
-    // ======================
-    // Logo y Firma en Base64 
-    // ======================
 
     // DEFINIR VARIABLES FUERA DEL IF
     let logoBase64 = null;
@@ -1271,10 +1275,10 @@ async function construirPDF(doc, datos) {
     
     const fechaObj = new Date(datos.fecha + 'T00:00:00');
     const dia = fechaObj.getDate().toString().padStart(2, '0');
-    const mesNum = (fechaObj.getMonth() + 1).toString().padStart(2, '0');
+    const mesNum = fechaObj.toLocaleDateString('es-ES', { month: 'long' }).toUpperCase();
     const anio = fechaObj.getFullYear();
     doc.setFont(undefined, 'normal');
-    doc.text(`${dia}/${mesNum}/${anio}`, margin, y + 8);
+    doc.text(`${dia} ${mesNum} ${anio}`, margin, y + 8);
     
     // Título principal CENTRADO
     doc.setFontSize(14);
@@ -1285,7 +1289,7 @@ async function construirPDF(doc, datos) {
     // Logo (derecha arriba)
     try {
         if (logoBase64) {  // VERIFICAR QUE EXISTA
-            doc.addImage(logoBase64, 'PNG', pageWidth - margin - 25, y - 9, 29, 20);
+            doc.addImage(logoBase64, 'PNG', pageWidth - margin - 35, y - 15, 39, 30);
         }
     } catch (e) {
         console.log('Error cargando logo');
@@ -1419,28 +1423,30 @@ async function construirPDF(doc, datos) {
     let yCheck = y + 9;
     
     dibujarCheckboxMejorado(doc, col1X + 3, yCheck, datos.servicioPor === 'CONTRATO');
-    doc.text('CONTRATO', col1X + 8, yCheck + 3);
+    doc.text('CONTRATO', col1X + 8, yCheck + 2.5);
     
     yCheck += 5;
     dibujarCheckboxMejorado(doc, col1X + 3, yCheck, datos.servicioPor === 'EVENTO');
-    doc.text('EVENTO', col1X + 8, yCheck + 3);
+    doc.text('EVENTO', col1X + 8, yCheck + 2.5);
     
     yCheck += 8;
+    doc.setFontSize(8);
     doc.setFont(undefined, 'bold');
     doc.text('ESTADO ACTUAL DEL EQUIPO:', col1X + 3, yCheck);
-    doc.setFont(undefined, 'normal');
     
-    yCheck += 5;
+    doc.setFontSize(7);
+    doc.setFont(undefined, 'normal');
+    yCheck += 3;
     dibujarCheckboxMejorado(doc, col1X + 3, yCheck, datos.estadoEquipo === 'FUNCIONANDO');
-    doc.text('FUNCIONANDO', col1X + 8, yCheck + 3);
+    doc.text('FUNCIONANDO', col1X + 8, yCheck + 2.5);
     
     yCheck += 5;
     dibujarCheckboxMejorado(doc, col1X + 3, yCheck, datos.estadoEquipo === 'CON FALLA');
-    doc.text('CON FALLA', col1X + 8, yCheck + 3);
+    doc.text('CON FALLA', col1X + 8, yCheck + 2.5);
     
     yCheck += 5;
     dibujarCheckboxMejorado(doc, col1X + 3, yCheck, datos.estadoEquipo === 'FUERA DE SERVICIO');
-    doc.text('FUERA DE SERVICIO', col1X + 8, yCheck + 3);
+    doc.text('FUERA DE SERVICIO', col1X + 8, yCheck + 2.5);
     
     // MOTIVO DEL SERVICIO
     const col2Xnew = col1X + col3Width + 5;
@@ -1457,27 +1463,27 @@ async function construirPDF(doc, datos) {
     yCheck = y + 9;
     
     dibujarCheckboxMejorado(doc, col2Xnew + 3, yCheck, datos.tipoMto === 'PREVENTIVO');
-    doc.text('MTO PREVENTIVO', col2Xnew + 8, yCheck + 3);
+    doc.text('MTO PREVENTIVO', col2Xnew + 8, yCheck + 2.5);
     
     yCheck += 5;
     dibujarCheckboxMejorado(doc, col2Xnew + 3, yCheck, datos.tipoMto === 'CORRECTIVO');
-    doc.text('MTO CORRECTIVO', col2Xnew + 8, yCheck + 3);
+    doc.text('MTO CORRECTIVO', col2Xnew + 8, yCheck + 2.5);
     
     yCheck += 5;
     dibujarCheckboxMejorado(doc, col2Xnew + 3, yCheck, datos.tipoMto === 'DIAGNOSTICO');
-    doc.text('DIAGNÓSTICO', col2Xnew + 8, yCheck + 3);
+    doc.text('DIAGNÓSTICO', col2Xnew + 8, yCheck + 2.5);
     
     yCheck += 5;
     dibujarCheckboxMejorado(doc, col2Xnew + 3, yCheck, datos.tipoMto === 'INSTALACION');
-    doc.text('INSTALACIÓN', col2Xnew + 8, yCheck + 3);
+    doc.text('INSTALACIÓN', col2Xnew + 8, yCheck + 2.5);
     
     yCheck += 5;
     dibujarCheckboxMejorado(doc, col2Xnew + 3, yCheck, datos.tipoMto === 'DESINSTALACION');
-    doc.text('DESINSTALACIÓN', col2Xnew + 8, yCheck + 3);
+    doc.text('DESINSTALACIÓN', col2Xnew + 8, yCheck + 2.5);
     
     yCheck += 5;
     dibujarCheckboxMejorado(doc, col2Xnew + 3, yCheck, datos.tipoMto === 'BAJADELEQUIPO');
-    doc.text('BAJA DEL EQUIPO', col2Xnew + 8, yCheck + 3);
+    doc.text('BAJA DEL EQUIPO', col2Xnew + 8, yCheck + 2.5);
     
     // ESTADO DE ACCESORIOS
     const col3X = col2Xnew + col3Width + 5;
@@ -1534,14 +1540,14 @@ async function construirPDF(doc, datos) {
         if (fila[0]) {
             const isChecked1 = datos.tareas.includes(fila[0]);
             dibujarCheckboxMejorado(doc, margin + 3, yTarea, isChecked1);
-            doc.text(fila[0], margin + 8, yTarea + 3);
+            doc.text(fila[0], margin + 8, yTarea + 2.5);
         }
         
         // Columna 2
         if (fila[1]) {
             const isChecked2 = datos.tareas.includes(fila[1]);
             dibujarCheckboxMejorado(doc, margin + 3 + 90, yTarea, isChecked2);
-            doc.text(fila[1], margin + 8 + 90, yTarea + 3);
+            doc.text(fila[1], margin + 8 + 90, yTarea + 2.5);
         }
         
         yTarea += 5;
@@ -1837,7 +1843,7 @@ if (datos.verificacionParametros.tipo === 'LAMPARA') {
     // Agregar firma del técnico
     try {
         if(datos.tecnicoData.firma) {  // Usar firma del técnico seleccionado
-            doc.addImage(datos.tecnicoData.firma, 'PNG', margin + 50, y + 9, 30, 14);
+            doc.addImage(datos.tecnicoData.firma, 'PNG', margin + 45, y + 5, 35, 19);
         }
     } catch (e) {
         console.log('Error cargando firma del técnico');
@@ -2348,7 +2354,7 @@ async function procesarExcel() {
     const clienteId = document.getElementById('equipoCliente').value;
     
     if (!clienteId) {
-        alert('Por favor seleccione un cliente primero');
+        mostrarToast('Por favor seleccione un cliente primero', 'Error');
         return;
     }
     
@@ -2601,6 +2607,12 @@ document.getElementById('formEquipoRefrigeracion').addEventListener('submit', fu
         ubicacion: document.getElementById('equipoUbicacionRefrigeracion').value.toUpperCase(),
         fechaCreacion: new Date()
     };
+
+    // Validar que se haya seleccionado un cliente
+    if (!clienteId) {
+        mostrarToast('Por favor seleccione un cliente', 'Error');
+        return;
+    }
     
     db.collection('equipos-refrigeracion').add(equipo)
         .then(() => {
@@ -3127,149 +3139,262 @@ async function generarPDFRefrigeracion() {
 }
 
 async function construirPDFRefrigeracion(doc, datos) {
+    
     const pageWidth = 210;
     const pageHeight = 297;
     const margin = 15;
     
     // Colores
     const colorAzulClaro = [216, 232, 247];
-    const colorVerdeClaro = [220, 247, 235]; // Color alternativo para refrigeración
-    
-    // Obtener logo de la empresa
+    const colorNegro = [0, 0, 0];
+    const colorGrisOscuro = [50, 50, 50];
+
+    // DEFINIR VARIABLES FUERA DEL IF
     let logoBase64 = null;
+    let firmaBase64 = null;
+
+    const cfg = await db.collection('configuracion').doc('general').get();
+
+    if (cfg.exists) {
+        const c = cfg.data();
+        if (c.logoBase64) {
+            logoBase64 = c.logoBase64;  // GUARDAR EN VARIABLE
+        }
+        if (c.firmaBase64) {
+            firmaBase64 = c.firmaBase64;  // GUARDAR EN VARIABLE
+        }
+    }
+
+
+    let y = margin-3;
+    
+    // =======================================
+    // ENCABEZADO: FECHA, TÍTULO Y LOGO
+    // =======================================
+    
+    // Fecha (izquierda arriba) - MÁS OSCURA
+    doc.setFontSize(9);
+    doc.setTextColor(colorGrisOscuro[0], colorGrisOscuro[1], colorGrisOscuro[2]);
+    doc.setFont(undefined, 'bold');
+    doc.text('FECHA:', margin, y + 3);
+    
+    const fechaObj = new Date(datos.fecha + 'T00:00:00');
+    const dia = fechaObj.getDate().toString().padStart(2, '0');
+    const mesNum = fechaObj.toLocaleDateString('es-ES', { month: 'long' }).toUpperCase();
+    //const mesNum = (fechaObj.getMonth() + 1).toString().padStart(2, '0');
+    const anio = fechaObj.getFullYear();
+    doc.setFont(undefined, 'normal');
+    doc.text(`${dia} ${mesNum} ${anio}`, margin, y + 8);
+    
+    // Título principal CENTRADO
+    doc.setFontSize(14);
+    doc.setFont(undefined, 'bold');
+    doc.setTextColor(colorNegro[0], colorNegro[1], colorNegro[2]);
+    doc.text('REPORTE DE SERVICIO TÉCNICO', pageWidth / 2, y + 6, { align: 'center' });
+    
+    // Logo (derecha arriba)
     try {
-        const cfg = await db.collection('configuracion').doc('empresa').get();
-        if (cfg.exists) {
-            const c = cfg.data();
-            if (c.logo) {
-                logoBase64 = c.logo;
-            }
+        if (logoBase64) {  // VERIFICAR QUE EXISTA
+            doc.addImage(logoBase64, 'PNG', pageWidth - margin - 35, y - 15, 39, 30);
         }
-    } catch (error) {
-        console.log('No se pudo cargar el logo');
+    } catch (e) {
+        console.log('Error cargando logo');
     }
     
-    let y = margin;
+    y += 12;
     
-    // ======================
-    // ENCABEZADO
-    // ======================
+    // LÍNEA HORIZONTAL debajo del encabezado
+    doc.setDrawColor(100, 100, 100);
+    doc.setLineWidth(0.5);
+    doc.line(margin, y, pageWidth - margin, y);
     
-    // Logo de la empresa (lado izquierdo)
-    if (logoBase64) {
-        try {
-            doc.addImage(logoBase64, 'PNG', margin, y, 40, 20);
-        } catch (e) {
-            console.log('Error al cargar logo de empresa');
-        }
+    y += 12;
+    
+    // =======================================
+    // DATOS DE LA INSTITUCIÓN Y EQUIPO
+    // =======================================
+    
+    const col11X = margin;
+    const col11Width = 85;
+    const col22X = col11X + col11Width + 5;
+    const col22Width = pageWidth - margin - col22X;
+    const sectionHeight = 48;
+    
+    // Rectángulo 1: DATOS DE LA INSTITUCIÓN
+    doc.setFillColor(colorAzulClaro[0], colorAzulClaro[1], colorAzulClaro[2]);
+    doc.roundedRect(col11X, y, col11Width, sectionHeight, 3, 3, 'F');
+    doc.setDrawColor(150, 150, 150);
+    doc.setLineWidth(0.3);
+    doc.roundedRect(col11X, y, col11Width, sectionHeight, 3, 3, 'S');
+    
+    doc.setFontSize(8);
+    doc.setFont(undefined, 'bold');
+    doc.setTextColor(colorNegro[0], colorNegro[1], colorNegro[2]);
+    doc.text('DATOS DEL PROPIETARIO', col11X + 3, y + 5);
+    
+    doc.setFontSize(7);
+    let yInterno = y + 9;
+    
+    doc.setFont(undefined, 'bold');
+    doc.text('NOMBRE:', col11X + 3, yInterno);
+    doc.setFont(undefined, 'normal');
+    const nombreLineas = doc.splitTextToSize(datos.cliente.nombre, col11Width - 6);
+    doc.text(nombreLineas[0] || '', col11X + 3, yInterno + 4);
+    
+    yInterno += 8;
+    doc.setFont(undefined, 'bold');
+    doc.text('DIRECCION:', col11X + 3, yInterno);
+    doc.setFont(undefined, 'normal');
+    const dirLineas = doc.splitTextToSize(datos.cliente.direccion, col11Width - 6);
+    doc.text(dirLineas[0] || '', col11X + 3, yInterno + 4);
+    if (dirLineas[1]) {
+        doc.text(dirLineas[1], col11X + 3, yInterno + 7);
     }
     
-    // Logo del cliente (lado derecho)
-    if (datos.cliente.logoBase64) {
-        try {
-            doc.addImage(datos.cliente.logoBase64, 'PNG', pageWidth - margin - 40, y, 40, 20);
-        } catch (e) {
-            console.log('Error al cargar logo del cliente');
-        }
-    }
-    
-    y += 25;
-    
-    // Título principal
-    doc.setFontSize(16);
+    yInterno += dirLineas.length > 1 ? 11 : 8;
     doc.setFont(undefined, 'bold');
-    doc.text('REPORTE DE SERVICIO - REFRIGERACIÓN', pageWidth / 2, y, { align: 'center' });
+    doc.text('TELEFONO:', col11X + 3, yInterno);
+    doc.setFont(undefined, 'normal');
+    doc.text(datos.cliente.telefono, col11X + 3, yInterno + 4);
     
-    y += 10;
+    yInterno += 8;
+    doc.setFont(undefined, 'bold');
+    doc.text('CORREO ELECTRÓNICO:', col11X + 3, yInterno);
+    doc.setFont(undefined, 'normal');
+    const correoLineas = doc.splitTextToSize(datos.cliente.correo, col11Width - 6);
+    doc.text(correoLineas[0] || '', col11X + 3, yInterno + 4);
     
-    // ======================
-    // INFORMACIÓN DEL CLIENTE
-    // ======================
+    // Rectángulo 2: DATOS DEL EQUIPO
+    doc.setFillColor(colorAzulClaro[0], colorAzulClaro[1], colorAzulClaro[2]);
+    doc.roundedRect(col22X, y, col22Width, sectionHeight, 3, 3, 'F');
+    doc.setDrawColor(150, 150, 150);
+    doc.roundedRect(col22X, y, col22Width, sectionHeight, 3, 3, 'S');
+    
+    doc.setFontSize(8);
+    doc.setFont(undefined, 'bold');
+    doc.text('DATOS DEL EQUIPO', col22X + 3, y + 5);
+    
+    doc.setFontSize(7);
+    yInterno = y + 9;
+    
+    doc.setFont(undefined, 'bold');
+    doc.text('EQUIPO:', col22X + 3, yInterno);
+    doc.setFont(undefined, 'normal');
+    doc.text(datos.equipo.nombre.substring(0, 50), col22X + 3, yInterno + 4);
+
+    doc.setFont(undefined, 'bold');
+    doc.text('CAPACIDAD:', col22X + 40, yInterno);
+    doc.setFont(undefined, 'normal');
+    doc.text(datos.equipo.capacidad, col22X + 40, yInterno + 4);
+    
+    yInterno += 8;
+    doc.setFont(undefined, 'bold');
+    doc.text('MARCA:', col22X + 3, yInterno);
+    doc.setFont(undefined, 'normal');
+    doc.text(datos.equipo.marca, col22X + 3, yInterno + 4);
+
+    doc.setFont(undefined, 'bold');
+    doc.text('REFRIGERANTE:', col22X + 40, yInterno);
+    doc.setFont(undefined, 'normal');
+    doc.text(datos.equipo.refrigerante, col22X + 40, yInterno + 4);
+    
+    yInterno += 8;
+    doc.setFont(undefined, 'bold');
+    doc.text('TIPO:', col22X + 3, yInterno);
+    doc.setFont(undefined, 'normal');
+    doc.text(datos.equipo.tipo, col22X + 3, yInterno + 4);
+
+    doc.setFont(undefined, 'bold');
+    doc.text('UBICACION:', col22X + 40, yInterno);
+    doc.setFont(undefined, 'normal');
+    doc.text(datos.equipo.ubicacion, col22X + 40, yInterno + 4);
+    
+    yInterno += 8;
+    doc.setFont(undefined, 'bold');
+    doc.text('MODELO:', col22X + 3, yInterno);
+    doc.setFont(undefined, 'normal');
+    doc.text(datos.equipo.modelo, col22X + 3, yInterno + 4);
+    
+    yInterno += 8;
+    doc.setFont(undefined, 'bold');
+    doc.text('SERIE:', col22X + 3, yInterno);
+    doc.setFont(undefined, 'normal');
+    doc.text(datos.equipo.serie, col22X + 3, yInterno + 4);
+
+    y += sectionHeight + 3;
+    
+    // =======================================
+    // FILA DE 3 SECCIONES
+    // ======================================
+    
+    const sectionHeight2 = 41;
+    
+    // SERVICIO POR
+    doc.setFillColor(colorAzulClaro[0], colorAzulClaro[1], colorAzulClaro[2]);
+    doc.setDrawColor(150, 150, 150);
+    doc.roundedRect(col11X, y, col11Width, sectionHeight2, 3, 3, 'FD');
+    
+    doc.setFontSize(8);
+    doc.setFont(undefined, 'bold');
+    doc.text('SERVICIO POR:', col11X + 3, y + 5);
+    
+    doc.setFontSize(7);
+    doc.setFont(undefined, 'normal');
+    let yCheck = y + 8;
+    
+    dibujarCheckboxMejorado(doc, col11X + 3, yCheck, datos.servicioPor === 'CONTRATO');
+    doc.text('CONTRATO', col11X + 8, yCheck + 2.5);
+    
+    yCheck += 5;
+    dibujarCheckboxMejorado(doc, col11X + 3, yCheck, datos.servicioPor === 'EVENTO');
+    doc.text('EVENTO', col11X +8, yCheck + 2.5);
+    
+    yCheck += 9;
+    doc.setFontSize(8);
+    doc.setFont(undefined, 'bold');
+    doc.text('ESTADO ACTUAL DEL EQUIPO:', col11X + 3, yCheck);
+    
+    doc.setFontSize(7);
+    doc.setFont(undefined, 'normal');
+    yCheck += 3;
+    dibujarCheckboxMejorado(doc, col11X + 3, yCheck, datos.estadoEquipo === 'FUNCIONANDO');
+    doc.text('FUNCIONANDO', col11X + 8, yCheck + 2.5);
+    
+    yCheck += 5;
+    dibujarCheckboxMejorado(doc, col11X + 3, yCheck, datos.estadoEquipo === 'CON FALLA');
+    doc.text('CON FALLA', col11X + 8, yCheck + 2.5);
+    
+    yCheck += 5;
+    dibujarCheckboxMejorado(doc, col11X + 3, yCheck, datos.estadoEquipo === 'FUERA DE SERVICIO');
+    doc.text('FUERA DE SERVICIO', col11X + 8, yCheck + 2.5);
+    
+    // MOTIVO DEL SERVICIO
     
     doc.setFillColor(colorAzulClaro[0], colorAzulClaro[1], colorAzulClaro[2]);
-    doc.roundedRect(margin, y, pageWidth - 2 * margin, 25, 3, 3, 'F');
     doc.setDrawColor(150, 150, 150);
-    doc.roundedRect(margin, y, pageWidth - 2 * margin, 25, 3, 3, 'S');
-    
-    doc.setFontSize(9);
-    doc.setFont(undefined, 'bold');
-    doc.text('INFORMACIÓN DEL CLIENTE', margin + 3, y + 5);
+    doc.roundedRect(col22X, y, col22Width, sectionHeight2, 3, 3, 'FD');
     
     doc.setFontSize(8);
-    doc.setFont(undefined, 'normal');
-    doc.text(`CLIENTE: ${datos.cliente.nombre}`, margin + 3, y + 10);
-    doc.text(`DIRECCIÓN: ${datos.cliente.direccion}`, margin + 3, y + 14);
-    doc.text(`TELÉFONO: ${datos.cliente.telefono}`, margin + 3, y + 18);
-    doc.text(`FECHA: ${datos.fecha}`, margin + 3, y + 22);
-    
-    y += 28;
-    
-    // ======================
-    // INFORMACIÓN DEL EQUIPO
-    // ======================
-    
-    doc.setFillColor(colorVerdeClaro[0], colorVerdeClaro[1], colorVerdeClaro[2]);
-    doc.roundedRect(margin, y, pageWidth - 2 * margin, 35, 3, 3, 'F');
-    doc.setDrawColor(150, 150, 150);
-    doc.roundedRect(margin, y, pageWidth - 2 * margin, 35, 3, 3, 'S');
-    
-    doc.setFontSize(9);
     doc.setFont(undefined, 'bold');
-    doc.text('INFORMACIÓN DEL EQUIPO', margin + 3, y + 5);
+    doc.text('MOTIVO DEL SERVICIO:', col22X + 3, y + 5);
     
-    doc.setFontSize(8);
+    doc.setFontSize(7);
     doc.setFont(undefined, 'normal');
-    doc.text(`EQUIPO: ${datos.equipo.nombre}`, margin + 3, y + 10);
-    doc.text(`MARCA: ${datos.equipo.marca}`, margin + 3, y + 14);
-    doc.text(`TIPO: ${datos.equipo.tipo || 'N/A'}`, margin + 3, y + 18);
-    doc.text(`MODELO: ${datos.equipo.modelo}`, margin + 3, y + 22);
+    yCheck = y + 9;
     
-    doc.text(`SERIE: ${datos.equipo.serie}`, margin + 95, y + 10);
-    doc.text(`CAPACIDAD: ${datos.equipo.capacidad || 'N/A'}`, margin + 95, y + 14);
-    doc.text(`REFRIGERANTE: ${datos.equipo.refrigerante || 'N/A'}`, margin + 95, y + 18);
-    doc.text(`UBICACIÓN: ${datos.equipo.ubicacion}`, margin + 95, y + 22);
+    dibujarCheckboxMejorado(doc, col22X + 3, yCheck, datos.tipoMto === 'PREVENTIVO');
+    doc.text('MANTENIMIENTO PREVENTIVO', col22X + 8, yCheck + 2.5);
     
-    y += 38;
+    yCheck += 5;
+    dibujarCheckboxMejorado(doc, col22X + 3, yCheck, datos.tipoMto === 'CORRECTIVO');
+    doc.text('MANTENIMIENTO CORRECTIVO', col22X + 8, yCheck + 2.5);
     
-    // ======================
-    // TIPO DE SERVICIO
-    // ======================
+    yCheck += 5;
+    dibujarCheckboxMejorado(doc, col22X + 3, yCheck, datos.tipoMto === 'DIAGNOSTICO');
+    doc.text('DIAGNÓSTICO', col22X + 8, yCheck + 2.5);
     
-    doc.setFillColor(colorAzulClaro[0], colorAzulClaro[1], colorAzulClaro[2]);
-    doc.roundedRect(margin, y, pageWidth - 2 * margin, 15, 3, 3, 'F');
-    doc.setDrawColor(150, 150, 150);
-    doc.roundedRect(margin, y, pageWidth - 2 * margin, 15, 3, 3, 'S');
-    
-    doc.setFontSize(9);
-    doc.setFont(undefined, 'bold');
-    doc.text('TIPO DE SERVICIO', margin + 3, y + 5);
-    
-    doc.setFontSize(8);
-    doc.setFont(undefined, 'normal');
-    doc.text(`SERVICIO POR: ${datos.servicioPor}`, margin + 3, y + 10);
-    doc.text(`TIPO DE MANTENIMIENTO: ${datos.tipoMto}`, margin + 60, y + 10);
-    
-    y += 18;
-    
-    // ======================
-    // ESTADO DEL EQUIPO
-    // ======================
-    
-    doc.setFillColor(colorAzulClaro[0], colorAzulClaro[1], colorAzulClaro[2]);
-    doc.roundedRect(margin, y, pageWidth - 2 * margin, 12, 3, 3, 'F');
-    doc.setDrawColor(150, 150, 150);
-    doc.roundedRect(margin, y, pageWidth - 2 * margin, 12, 3, 3, 'S');
-    
-    doc.setFontSize(9);
-    doc.setFont(undefined, 'bold');
-    doc.text('ESTADO DEL EQUIPO', margin + 3, y + 5);
-    
-    doc.setFontSize(8);
-    doc.setFont(undefined, 'normal');
-    doc.text(`${datos.estadoEquipo}`, margin + 3, y + 9);
-    
-    y += 15;
-    
+    y += sectionHeight2 +3;
+
     // ======================
     // ACTIVIDAD DE MANTENIMIENTO
     // ======================
@@ -3286,7 +3411,7 @@ async function construirPDFRefrigeracion(doc, datos) {
     
     doc.setFontSize(8);
     doc.setFont(undefined, 'normal');
-    const actividadLines = doc.splitTextToSize(datos.actividadMantenimiento, pageWidth - 2 * margin - 10);
+    const actividadLines = doc.splitTextToSize(datos.actividadMantenimiento.toUpperCase(), pageWidth - 2 * margin - 10);
     doc.text(actividadLines, margin + 3, y + 10);
     
     y += actividadHeight + 3;
@@ -3308,7 +3433,7 @@ async function construirPDFRefrigeracion(doc, datos) {
         
         doc.setFontSize(8);
         doc.setFont(undefined, 'normal');
-        const observacionesLines = doc.splitTextToSize(datos.observaciones, pageWidth - 2 * margin - 10);
+        const observacionesLines = doc.splitTextToSize(datos.observaciones.toUpperCase(), pageWidth - 2 * margin - 10);
         doc.text(observacionesLines, margin + 3, y + 10);
         
         y += observacionesHeight + 3;
@@ -3325,16 +3450,16 @@ async function construirPDFRefrigeracion(doc, datos) {
     }
     
     const firmaHeight = 30;
-    const col1Width = 90;
-    const col2Width = 90;
-    const col1X = margin;
-    const col2X = margin + col1Width + 5;
+    const col10Width = 85;
+    const col20Width = 90; 
+    const col10X = margin;
+    const col20X = margin + col10Width + 5;
     
     // SERVICIO REALIZADO POR
     doc.setFillColor(colorAzulClaro[0], colorAzulClaro[1], colorAzulClaro[2]);
-    doc.roundedRect(margin, y, col1Width, firmaHeight, 3, 3, 'F');
+    doc.roundedRect(margin, y, col10Width, firmaHeight, 3, 3, 'F');
     doc.setDrawColor(150, 150, 150);
-    doc.roundedRect(margin, y, col1Width, firmaHeight, 3, 3, 'S');
+    doc.roundedRect(margin, y, col10Width, firmaHeight, 3, 3, 'S');
     
     doc.setFontSize(8);
     doc.setFont(undefined, 'bold');
@@ -3349,7 +3474,7 @@ async function construirPDFRefrigeracion(doc, datos) {
     // Agregar firma del técnico
     if (datos.tecnicoData.firma) {
         try {
-            doc.addImage(datos.tecnicoData.firma, 'PNG', margin + 50, y + 9, 30, 14);
+            doc.addImage(datos.tecnicoData.firma, 'PNG', margin + 45, y + 5, 35, 19);
         } catch (e) {
             console.log('Error cargando firma del técnico');
         }
@@ -3357,29 +3482,29 @@ async function construirPDFRefrigeracion(doc, datos) {
     
     doc.setDrawColor(0, 0, 0);
     doc.setLineWidth(0.3);
-    doc.line(col1X + 45, y + 24, col1X + col1Width - 10, y + 24);
+    doc.line(col10X + 45, y + 24, col10X + col10Width - 10, y + 24);
     
     doc.setFontSize(6);
     doc.text('FIRMA', margin + 57, y + 27);
     
     // SERVICIO RECIBIDO Y APROBADO POR
     doc.setFillColor(colorAzulClaro[0], colorAzulClaro[1], colorAzulClaro[2]);
-    doc.roundedRect(col2X, y, col2Width, firmaHeight, 3, 3, 'F');
+    doc.roundedRect(col20X, y, col20Width, firmaHeight, 3, 3, 'F');
     doc.setDrawColor(150, 150, 150);
-    doc.roundedRect(col2X, y, col2Width, firmaHeight, 3, 3, 'S');
+    doc.roundedRect(col20X, y, col20Width, firmaHeight, 3, 3, 'S');
     
     doc.setFontSize(8);
     doc.setFont(undefined, 'bold');
-    doc.text('SERVICIO RECIBIDO Y APROBADO', col2X + 3, y + 5);
+    doc.text('SERVICIO RECIBIDO Y APROBADO', col20X + 3, y + 5);
     
     // Línea para firma
     doc.setDrawColor(0, 0, 0);
     doc.setLineWidth(0.3);
-    doc.line(col2X + 10, y + 24, col2X + col2Width - 10, y + 24);
+    doc.line(col20X + 10, y + 24, col20X + col20Width - 10, y + 24);
     
     doc.setFontSize(6);
     doc.setFont(undefined, 'normal');
-    doc.text('FIRMA', col2X + (col2Width / 2) - 4, y + 27);
+    doc.text('FIRMA', col20X + (col20Width / 2) - 4, y + 27);
     
     // ======================
     // EVIDENCIA FOTOGRÁFICA (si hay)
@@ -3555,7 +3680,7 @@ window.procesarExcelRefrigeracion = async function() {
     const clienteId = document.getElementById('equipoClienteRefrigeracion').value;
     
     if (!clienteId) {
-        alert('Por favor seleccione un cliente primero');
+        mostrarToast('Por favor seleccione un cliente primero', 'Error');
         return;
     }
     
@@ -3620,99 +3745,31 @@ window.procesarExcelRefrigeracion = async function() {
 
 console.log('Funciones de importación Excel para refrigeración cargadas correctamente');
 
-// ============================================
-// MANEJO DE VISIBILIDAD DE PÁGINA (MÓVILES)
-// ============================================
-
-// Detectar cuando la página se vuelve visible (usuario regresa a la app)
-document.addEventListener('visibilitychange', function() {
-    if (document.visibilityState === 'visible') {
-        console.log('Página visible nuevamente');
-        
-        // Verificar si hay una sesión activa
-        if (usuarioActual) {
-            // No hacer nada, mantener el estado actual
-            console.log('Usuario ya autenticado, manteniendo estado');
-        } else {
-            // Si no hay usuario, verificar autenticación
-            console.log('Verificando autenticación...');
-        }
-    } else {
-        console.log('Página en background');
-    }
-});
-
-// Detectar cuando la página está a punto de descargarse
-window.addEventListener('pagehide', function(event) {
-    // Guardar timestamp para detectar recargas forzadas
-    sessionStorage.setItem('lastPageHide', Date.now());
-});
-
-// Detectar cuando la página se carga
-window.addEventListener('pageshow', function(event) {
-    const lastHide = sessionStorage.getItem('lastPageHide');
-    const now = Date.now();
+// Función para mostrar Toast
+function mostrarToast(mensaje, tipo = 'info', duracion = 3000) {
+    // Tipos: 'success', 'Error', 'warning', 'info'
     
-    // Si fue un pageshow después de un pagehide reciente (menos de 2 segundos)
-    // es probable que sea una navegación back/forward
-    if (lastHide && (now - parseInt(lastHide)) < 2000) {
-        console.log('Navegación back/forward detectada');
-        
-        // Si viene del back/forward cache (bfcache)
-        if (event.persisted) {
-            console.log('Página restaurada desde caché');
-            // La página se restauró desde caché, no recargar
-            return;
-        }
-    }
-});
-
-// Prevenir recarga automática cuando se restaura desde background
-let paginaEnBackground = false;
-
-document.addEventListener('visibilitychange', function() {
-    if (document.hidden) {
-        paginaEnBackground = true;
-        console.log('Página ocultada');
-    } else {
-        if (paginaEnBackground) {
-            console.log('Página restaurada, NO recargando');
-            paginaEnBackground = false;
-            
-            // Asegurar que el estado visual esté correcto
-            if (usuarioActual) {
-                // Refrescar datos sin recargar página
-                actualizarVistaActual();
-            }
-        }
-    }
-});
-
-// Función para actualizar la vista actual sin recargar la página
-function actualizarVistaActual() {
-    console.log('Actualizando vista actual...');
+    const iconos = {
+        success: '✅',
+        Error: '❌',
+        warning: '⚠️',
+        info: 'ℹ️'
+    };
     
-    // Determinar qué vista está activa
-    const seccionActiva = document.querySelector('.seccion-contenido:not(.oculto)');
+    const toast = document.createElement('div');
+    toast.className = `toast ${tipo}`;
+    toast.innerHTML = `
+        <span class="icon">${iconos[tipo]}</span>
+        <span class="message">${mensaje}</span>
+    `;
     
-    if (!seccionActiva) return;
+    document.body.appendChild(toast);
     
-    const seccionId = seccionActiva.id;
-    
-    // Recargar datos según la sección activa
-    if (seccionId === 'seccion-clientes') {
-        cargarClientes();
-    } else if (seccionId === 'seccion-equipos') {
-        cargarEquipos();
-    } else if (seccionId === 'seccion-clientes-refrigeracion') {
-        cargarClientesRefrigeracion();
-    } else if (seccionId === 'seccion-equipos-refrigeracion') {
-        cargarEquiposRefrigeracion();
-    } else if (seccionId.includes('reporte')) {
-        cargarTecnicosEnSelects();
-    }
-    
-    console.log('Vista actualizada:', seccionId);
+    // Eliminar después de la duración
+    setTimeout(() => {
+        toast.classList.add('closing');
+        setTimeout(() => {
+            document.body.removeChild(toast);
+        }, 300);
+    }, duracion);
 }
-
-console.log('Sistema de manejo de visibilidad cargado');
