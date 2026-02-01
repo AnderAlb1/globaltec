@@ -2931,7 +2931,7 @@ window.cargarEquiposReporteRefrigeracion = function() {
             equipos.forEach((equipo) => {
                 const option = document.createElement('option');
                 option.value = equipo.id;
-                option.textContent = `${equipo.data.nombre} - ${equipo.data.marca} ${equipo.data.modelo}`;
+                option.textContent = `${equipo.data.nombre} - ${equipo.data.marca} (${equipo.data.ubicacion})`;
                 selectEquipo.appendChild(option);
             });
         })
