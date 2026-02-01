@@ -1333,9 +1333,11 @@ async function construirPDF(doc, datos) {
     doc.text('NOMBRE:', col1X + 3, yInterno);
     doc.setFont(undefined, 'normal');
     const nombreLineas = doc.splitTextToSize(datos.cliente.nombre, col1Width - 6);
-    doc.text(nombreLineas[0] || '', col1X + 3, yInterno + 4);
-    
-    yInterno += 8;
+    nombreLineas.forEach((linea, index) => {
+        doc.text(linea, col11X + 3, yInterno + 4 + (index * 3.5));
+    });
+
+    yInterno += 4 + (nombreLineas.length * 3.5);
     doc.setFont(undefined, 'bold');
     doc.text('DIRECCION:', col1X + 3, yInterno);
     doc.setFont(undefined, 'normal');
@@ -3239,9 +3241,11 @@ async function construirPDFRefrigeracion(doc, datos) {
     doc.text('NOMBRE:', col11X + 3, yInterno);
     doc.setFont(undefined, 'normal');
     const nombreLineas = doc.splitTextToSize(datos.cliente.nombre, col11Width - 6);
-    doc.text(nombreLineas[0] || '', col11X + 3, yInterno + 4);
-    
-    yInterno += 8;
+    nombreLineas.forEach((linea, index) => {
+        doc.text(linea, col11X + 3, yInterno + 4 + (index * 3.5));
+    });
+
+    yInterno += 4 + (nombreLineas.length * 3.5);
     doc.setFont(undefined, 'bold');
     doc.text('DIRECCION:', col11X + 3, yInterno);
     doc.setFont(undefined, 'normal');
