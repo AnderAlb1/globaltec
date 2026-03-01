@@ -84,8 +84,8 @@ document.getElementById('formLogin').addEventListener('submit', function(e) {
             mostrarAppPrincipal();
         })
         .catch((error) => {
-            mostrarError('Correo o contraseña incorrectos');
-            console.error('Error de login:', error);
+            mostrarerror('Correo o contraseña incorrectos');
+            console.error('error de login:', error);
         });
 });
 
@@ -99,7 +99,7 @@ window.cerrarSesion = function() {
                 esAdmin = false;
             })
             .catch((error) => {
-                alert('Error al cerrar sesión: ' + error.message);
+                mostrarToast('error al cerrar sesión: ' + error.message, 'error');
             });
     }
 }
@@ -148,7 +148,7 @@ function mostrarAppPrincipal() {
 }
 
 // Mostrar mensaje de error
-function mostrarError(mensaje) {
+function mostrarerror(mensaje) {
     const errorElement = document.getElementById('errorLogin');
     errorElement.textContent = mensaje;
     errorElement.classList.add('mostrar');
@@ -167,7 +167,7 @@ document.getElementById('formUsuario').addEventListener('submit', function(e) {
     e.preventDefault();
     
     if (!esAdmin) {
-        alert('Solo el administrador puede crear usuarios');
+        mostrarToast('Solo el administrador puede crear usuarios', 'error');
         return;
     }
     
@@ -180,7 +180,7 @@ document.getElementById('formUsuario').addEventListener('submit', function(e) {
     // Crear usuario
     auth.createUserWithEmailAndPassword(email, password)
         .then((userCredential) => {
-            alert('Usuario creado exitosamente');
+            mostrarToast('Usuario creado exitosamente', 'success');
             
             // Cerrar sesión del nuevo usuario y re-autenticar al admin
             return auth.updateCurrentUser(usuarioActualTemp);
@@ -190,7 +190,7 @@ document.getElementById('formUsuario').addEventListener('submit', function(e) {
             cargarUsuarios();
         })
         .catch((error) => {
-            let mensaje = 'Error al crear usuario';
+            let mensaje = 'error al crear usuario';
             if (error.code === 'auth/email-already-in-use') {
                 mensaje = 'Este correo ya está registrado';
             } else if (error.code === 'auth/weak-password') {
@@ -198,8 +198,8 @@ document.getElementById('formUsuario').addEventListener('submit', function(e) {
             } else if (error.code === 'auth/invalid-email') {
                 mensaje = 'Correo electrónico inválido';
             }
-            alert(mensaje);
-            console.error('Error:', error);
+            mostrarToast(mensaje, 'error');
+            console.error('error:', error);
         });
 });
 
@@ -421,13 +421,13 @@ window.eliminarCliente = function(id) {
             return db.collection('clientes').doc(id).delete();
         })
         .then(() => {
-            alert('Cliente eliminado');
+            mostrarToast('Cliente eliminado', 'success');
             cargarClientes();
             cargarEquipos();
             cargarClientesEnSelects();
         })
         .catch((error) => {
-            alert('Error al eliminar: ' + error.message);
+            mostrarToast('error al eliminar: ' + error.message , 'error');
         });
 }
 
@@ -438,11 +438,11 @@ window.eliminarEquipo = function(id) {
     
     db.collection('equipos').doc(id).delete()
         .then(() => {
-            alert('Equipo eliminado');
+            mostrarToast('Equipo eliminado', 'success');
             cargarEquipos();
         })
         .catch((error) => {
-            alert('Error al eliminar: ' + error.message);
+            mostrarToast('error al eliminar: ' + error.message, 'error');
         });
 }
 
@@ -475,6 +475,11 @@ window.toggleEstadoAccesorio = function(button) {
 document.getElementById('formCliente').addEventListener('submit', async function(e) {
     e.preventDefault();
 
+    // VALIDAR ANTES DE PROCESAR
+    if (!validarFormulario(this)) {
+        return;
+    }
+
     const cliente = {
         nombre: document.getElementById('clienteNombre').value,
         direccion: document.getElementById('clienteDireccion').value,
@@ -486,12 +491,12 @@ document.getElementById('formCliente').addEventListener('submit', async function
 
     db.collection('clientes').add(cliente)
         .then(() => {
-            alert("Cliente agregado exitosamente");
+            mostrarToast("Cliente agregado exitosamente", 'success');
             document.getElementById('formCliente').reset();
             cargarClientes();
             cargarClientesEnSelects();
         })
-        .catch(error => alert("Error al agregar: " + error.message));
+        .catch(error => mostrarToast('error al agregar: ' + error.message, 'error'));
 });
 
 
@@ -511,13 +516,20 @@ function cargarClientes() {
             mostrarClientes(clientesCache);
         })
         .catch((error) => {
-            console.error('Error al cargar clientes:', error);
+            console.error('error al cargar clientes:', error);
         });
 }
 
 function mostrarClientes(clientes) {
     const lista = document.getElementById('listaClientes');
+    const contador = document.getElementById('contadorClientes');
+    
     lista.innerHTML = '';
+    
+    // ACTUALIZAR CONTADOR - AGREGAR ESTO
+    if (contador) {
+        contador.textContent = clientes.length;
+    }
     
     if (clientes.length === 0) {
         lista.innerHTML = '<p class="texto-info">No hay clientes que coincidan con la búsqueda</p>';
@@ -570,6 +582,11 @@ window.buscarClientes = function(texto) {
 document.getElementById('formEquipo').addEventListener('submit', function(e) {
     e.preventDefault();
     
+    // VALIDAR ANTES DE PROCESAR
+    if (!validarFormulario(this)) {
+        return;
+    }
+
     const accesoriosTexto = document.getElementById('equipoAccesorios').value;
     const accesoriosArray = accesoriosTexto ? accesoriosTexto.split(',').map(a => a.trim()) : [];
     
@@ -589,18 +606,18 @@ document.getElementById('formEquipo').addEventListener('submit', function(e) {
 
     // Validar que se haya seleccionado un cliente
     if (!clienteId) {
-        mostrarToast('Por favor seleccione un cliente', 'Error');
+        mostrarToast('Por favor seleccione un cliente', 'error');
         return;
     }
     
     db.collection('equipos').add(equipo)
         .then(() => {
-            alert('Equipo agregado exitosamente');
+            mostrarToast('Equipo agregado exitosamente', 'success');
             document.getElementById('formEquipo').reset();
             cargarEquipos();
         })
         .catch((error) => {
-            alert('Error al agregar equipo: ' + error.message);
+            mostrarToast('error al agregar equipo: ' + error.message, 'error');
         });
 });
 
@@ -632,19 +649,25 @@ function cargarEquipos() {
                 });
         })
         .catch((error) => {
-            console.error('Error al cargar equipos:', error);
+            console.error('error al cargar equipos:', error);
         });
 }
 
 function mostrarEquipos(equipos) {
     const lista = document.getElementById('listaEquipos');
+    const contador = document.getElementById('contadorEquipos');
+    
     lista.innerHTML = '';
+    
+    // ACTUALIZAR CONTADOR
+    if (contador) {
+        contador.textContent = equipos.length;
+    }
     
     if (equipos.length === 0) {
         lista.innerHTML = '<p class="texto-info">No hay equipos que coincidan con la búsqueda</p>';
         return;
     }
-    
     equipos.forEach((equipo) => {
         const div = document.createElement('div');
         div.className = 'item-lista';
@@ -737,7 +760,7 @@ function cargarClientesEnSelects() {
             });
         })
         .catch((error) => {
-            console.error('Error al cargar clientes en selects:', error);
+            console.error('error al cargar clientes en selects:', error);
         });
 }
 
@@ -780,7 +803,7 @@ document.getElementById('reporteCliente').addEventListener('change', function() 
             });
         })
         .catch((error) => {
-            console.error('Error al cargar equipos:', error);
+            console.error('error al cargar equipos:', error);
         });
 });
 
@@ -822,7 +845,7 @@ document.getElementById('reporteEquipo').addEventListener('change', function() {
             });
         })
         .catch((error) => {
-            console.error('Error al cargar accesorios:', error);
+            console.error('error al cargar accesorios:', error);
         });
 });
 
@@ -870,7 +893,7 @@ document.getElementById('reporteEquipo').addEventListener('change', async functi
         verificacionTextarea.style.display = 'block';
         
     } catch (error) {
-        console.error('Error al verificar equipo:', error);
+        console.error('error al verificar equipo:', error);
         verificacionTextarea.style.display = 'block';
     }
 });
@@ -1108,6 +1131,12 @@ window.cerrarModalCliente = function() {
 document.getElementById('formEditarCliente').addEventListener('submit', async function(e) {
     e.preventDefault();
 
+
+        // VALIDAR ANTES DE PROCESAR
+    if (!validarFormulario(this)) {
+        return;
+    }
+
     const id = document.getElementById("editClienteId").value;
     
     // Leer datos editados
@@ -1127,12 +1156,12 @@ document.getElementById('formEditarCliente').addEventListener('submit', async fu
     // Guardar en Firestore
     db.collection("clientes").doc(id).update(datosActualizados)
         .then(() => {
-            alert("Cliente actualizado correctamente");
+            mostrarToast('Cliente actualizado correctamente', 'success');
             cerrarModalCliente();
             cargarClientes();
         })
         .catch(error => {
-            alert("Error al actualizar: " + error.message);
+            mostrarToast('error al actualizar: ' + error.message, 'error');
         });
 });
 
@@ -1141,7 +1170,13 @@ document.getElementById('formEditarCliente').addEventListener('submit', async fu
 // ============================================
 
 document.getElementById('formReporte').addEventListener('submit', async function(e) {
+   
     e.preventDefault();
+    // VALIDAR FORMULARIO ANTES DE GENERAR PDF
+    if (!validarFormulario(this)) {
+        return;
+    }
+    
     await generarPDF();
 });
 
@@ -1171,14 +1206,14 @@ async function generarPDF() {
         // Obtener técnico seleccionado
         const tecnicoId = document.getElementById('reporteTecnico').value;
         if (!tecnicoId) {
-            alert('Por favor seleccione un técnico');
+            mostrarToast('Por favor seleccione un técnico', 'warning');
             return;
         }
 
         // Obtener datos del técnico desde Firebase
         const tecnicoDoc = await db.collection('tecnicos').doc(tecnicoId).get();
         if (!tecnicoDoc.exists) {
-            alert('Error: No se encontró el técnico seleccionado');
+            mostrarToast('error: No se encontró el técnico seleccionado', 'error');
             return;
         }
 
@@ -1229,8 +1264,8 @@ async function generarPDF() {
         });
         
     } catch (error) {
-        alert('Error al generar PDF: ' + error.message);
-        console.error('Error:', error);
+        mostrarToast('error al generar PDF: ' + error.message, 'error');
+        console.error('error:', error);
     }
 }
 
@@ -1292,7 +1327,7 @@ async function construirPDF(doc, datos) {
             doc.addImage(logoBase64, 'PNG', pageWidth - margin - 35, y - 15, 39, 30);
         }
     } catch (e) {
-        console.log('Error cargando logo');
+        console.log('error cargando logo');
     }
     
     y += 12;
@@ -1852,7 +1887,7 @@ if (datos.verificacionParametros.tipo === 'LAMPARA') {
             doc.addImage(datos.tecnicoData.firma, 'PNG', margin + 45, y + 5, 35, 19);
         }
     } catch (e) {
-        console.log('Error cargando firma del técnico');
+        console.log('error cargando firma del técnico');
     }
     
     doc.setDrawColor(0, 0, 0);
@@ -1909,7 +1944,7 @@ if (datos.verificacionParametros.tipo === 'LAMPARA') {
             try {
                 doc.addImage(fotosSeleccionadas[i], 'JPEG', xFoto, yFoto, 85, 85);
             } catch (e) {
-                console.log('Error agregando foto');
+                console.log('error agregando foto');
             }
             
             fotosPorFila++;
@@ -1991,6 +2026,11 @@ window.cerrarModalEquipo = function() {
 document.getElementById('formEditarEquipo').addEventListener('submit', function(e) {
     e.preventDefault();
     
+        // VALIDAR ANTES DE PROCESAR
+    if (!validarFormulario(this)) {
+        return;
+    }
+
     const id = document.getElementById('editEquipoId').value;
     const accesoriosTexto = document.getElementById('editEquipoAccesorios').value;
     const accesoriosArray = accesoriosTexto ? accesoriosTexto.split(',').map(a => a.trim()) : [];
@@ -2006,12 +2046,12 @@ document.getElementById('formEditarEquipo').addEventListener('submit', function(
     
     db.collection('equipos').doc(id).update(equipoActualizado)
         .then(() => {
-            alert('Equipo actualizado exitosamente');
+            mostrarToast('Equipo actualizado exitosamente', 'success');
             cerrarModalEquipo();
             cargarEquipos();
         })
         .catch((error) => {
-            alert('Error al actualizar equipo: ' + error.message);
+            mostrarToast('error al actualizar equipo: ' + error.message, 'error');
         });
 });
 
@@ -2238,7 +2278,7 @@ document.getElementById('formConfiguracion')
       .doc('general')
       .set(data, { merge: true });
 
-    alert('Configuración guardada');
+    mostrarToast('Configuración guardada', 'success');
 });
 
 async function cargarConfiguracion() {
@@ -2325,7 +2365,7 @@ async function leerArchivoExcel(file) {
         document.getElementById('btnProcesarExcel').disabled = equiposDesdeExcel.length === 0;
         
     } catch (error) {
-        alert('Error al leer el archivo Excel: ' + error.message);
+        mostrarToast('error al leer el archivo Excel: ' + error.message, 'error');
         console.error(error);
     }
 }
@@ -2360,12 +2400,12 @@ async function procesarExcel() {
     const clienteId = document.getElementById('equipoCliente').value;
     
     if (!clienteId) {
-        mostrarToast('Por favor seleccione un cliente primero', 'Error');
+        mostrarToast('Por favor seleccione un cliente primero', 'error');
         return;
     }
     
     if (equiposDesdeExcel.length === 0) {
-        alert('No hay equipos para procesar');
+        mostrarToast('No hay equipos para procesar', 'info');
         return;
     }
     
@@ -2395,12 +2435,12 @@ async function procesarExcel() {
             });
             exitosos++;
         } catch (error) {
-            console.error('Error al agregar equipo:', equipo.nombre, error);
+            console.error('error al agregar equipo:', equipo.nombre, error);
             fallidos++;
         }
     }
     
-    alert(`Proceso completado:\n✓ ${exitosos} equipos agregados exitosamente\n${fallidos > 0 ? `✗ ${fallidos} equipos fallaron` : ''}`);
+    mostrarToast(`Proceso completado:\n✓ ${exitosos} equipos agregados exitosamente\n${fallidos > 0 ? `✗ ${fallidos} equipos fallaron` : ''}`, 'success');
     
     // Limpiar y recargar
     document.getElementById('archivoExcel').value = '';
@@ -2448,7 +2488,7 @@ function cargarClientesRefrigeracion() {
             });
         })
         .catch((error) => {
-            console.error('Error al cargar clientes de refrigeración:', error);
+            console.error('error al cargar clientes de refrigeración:', error);
         });
 }
 
@@ -2486,7 +2526,7 @@ function cargarEquiposRefrigeracion() {
             });
         })
         .catch((error) => {
-            console.error('Error al cargar equipos de refrigeración:', error);
+            console.error('error al cargar equipos de refrigeración:', error);
         });
 }
 
@@ -2516,15 +2556,179 @@ function cargarClientesEnSelectsRefrigeracion() {
         });
 }
 
-// Funciones de búsqueda para refrigeración
-function buscarClientesRefrigeracion(busqueda) {
-    // Implementar búsqueda similar a la de biomédico
-    console.log('Buscando clientes de refrigeración:', busqueda);
+// ============================================
+// BÚSQUEDA DE CLIENTES - REFRIGERACIÓN
+// ============================================
+
+let clientesCacheRefrigeracion = [];
+
+function cargarClientesRefrigeracion() {
+    db.collection('clientes-refrigeracion').orderBy('nombre').get()
+        .then((querySnapshot) => {
+            clientesCacheRefrigeracion = [];
+            
+            querySnapshot.forEach((doc) => {
+                clientesCacheRefrigeracion.push({
+                    id: doc.id,
+                    ...doc.data()
+                });
+            });
+            
+            mostrarClientesRefrigeracion(clientesCacheRefrigeracion);
+        })
+        .catch((error) => {
+            console.error('error al cargar clientes de refrigeración:', error);
+        });
 }
 
-function buscarEquiposRefrigeracion(busqueda) {
-    // Implementar búsqueda similar a la de biomédico
-    console.log('Buscando equipos de refrigeración:', busqueda);
+function mostrarClientesRefrigeracion(clientes) {
+    const lista = document.getElementById('listaClientesRefrigeracion');
+    const contador = document.getElementById('contadorClientesRefrigeracion');
+    
+    lista.innerHTML = '';
+    
+    // ACTUALIZAR CONTADOR
+    if (contador) {
+        contador.textContent = clientes.length;
+    }
+    
+    if (clientes.length === 0) {
+        lista.innerHTML = '<p class="texto-info">No hay clientes que coincidan con la búsqueda</p>';
+        return;
+    }
+    
+    clientes.forEach((cliente) => {
+        const div = document.createElement('div');
+        div.className = 'item-lista';
+        div.innerHTML = `
+            <div class="item-info">
+                <h3>${cliente.nombre}</h3>
+                <p><strong>Dirección:</strong> ${cliente.direccion}</p>
+                <p><strong>Teléfono:</strong> ${cliente.telefono}</p>
+                <p><strong>Correo:</strong> ${cliente.correo || 'Sin correo'}</p>
+            </div>
+            <div class="item-acciones">
+                <button class="btn-editar" onclick="editarClienteRefrigeracion('${cliente.id}')">✏️ Editar</button>
+                <button class="btn-eliminar" onclick="eliminarClienteRefrigeracion('${cliente.id}')">🗑️ Eliminar</button>
+            </div>
+        `;
+        lista.appendChild(div);
+    });
+}
+
+window.buscarClientesRefrigeracion = function(texto) {
+    const terminoBusqueda = texto.toLowerCase().trim();
+    
+    if (!terminoBusqueda) {
+        mostrarClientesRefrigeracion(clientesCacheRefrigeracion);
+        return;
+    }
+    
+    const clientesFiltrados = clientesCacheRefrigeracion.filter(cliente => {
+        return cliente.nombre.toLowerCase().includes(terminoBusqueda) ||
+               cliente.direccion.toLowerCase().includes(terminoBusqueda) ||
+               cliente.telefono.includes(terminoBusqueda) ||
+               (cliente.correo && cliente.correo.toLowerCase().includes(terminoBusqueda));
+    });
+    
+    mostrarClientesRefrigeracion(clientesFiltrados);
+}
+
+// ============================================
+// BÚSQUEDA DE EQUIPOS - REFRIGERACIÓN
+// ============================================
+
+let equiposCacheRefrigeracion = [];
+
+function cargarEquiposRefrigeracion() {
+    // Primero cargar todos los clientes
+    db.collection('clientes-refrigeracion').get()
+        .then((clientesSnapshot) => {
+            const clientesMap = {};
+            clientesSnapshot.forEach((doc) => {
+                clientesMap[doc.id] = doc.data().nombre;
+            });
+            
+            // Luego cargar equipos
+            return db.collection('equipos-refrigeracion').orderBy('nombre').get()
+                .then((querySnapshot) => {
+                    equiposCacheRefrigeracion = [];
+                    
+                    querySnapshot.forEach((doc) => {
+                        const equipo = doc.data();
+                        equiposCacheRefrigeracion.push({
+                            id: doc.id,
+                            ...equipo,
+                            clienteNombre: clientesMap[equipo.clienteId] || equipo.clienteNombre || 'N/A'
+                        });
+                    });
+                    
+                    mostrarEquiposRefrigeracion(equiposCacheRefrigeracion);
+                });
+        })
+        .catch((error) => {
+            console.error('error al cargar equipos de refrigeración:', error);
+        });
+}
+
+function mostrarEquiposRefrigeracion(equipos) {
+    const lista = document.getElementById('listaEquiposRefrigeracion');
+    const contador = document.getElementById('contadorEquiposRefrigeracion');
+    
+    lista.innerHTML = '';
+    
+    // ACTUALIZAR CONTADOR
+    if (contador) {
+        contador.textContent = equipos.length;
+    }
+    
+    if (equipos.length === 0) {
+        lista.innerHTML = '<p class="texto-info">No hay equipos que coincidan con la búsqueda</p>';
+        return;
+    }
+    
+    equipos.forEach((equipo) => {
+        const div = document.createElement('div');
+        div.className = 'item-lista';
+        div.innerHTML = `
+            <div class="item-info">
+                <h3>${equipo.nombre}</h3>
+                <p><strong>Cliente:</strong> ${equipo.clienteNombre}</p>
+                <p><strong>Marca:</strong> ${equipo.marca} | <strong>Tipo:</strong> ${equipo.tipo || 'N/A'}</p>
+                <p><strong>Modelo:</strong> ${equipo.modelo} | <strong>Serie:</strong> ${equipo.serie}</p>
+                <p><strong>Capacidad:</strong> ${equipo.capacidad || 'N/A'} | <strong>Refrigerante:</strong> ${equipo.refrigerante || 'N/A'}</p>
+                <p><strong>Ubicación:</strong> ${equipo.ubicacion}</p>
+            </div>
+            <div class="item-acciones">
+                <button class="btn-editar" onclick="editarEquipoRefrigeracion('${equipo.id}')">✏️ Editar</button>
+                <button class="btn-eliminar" onclick="eliminarEquipoRefrigeracion('${equipo.id}')">🗑️ Eliminar</button>
+            </div>
+        `;
+        lista.appendChild(div);
+    });
+}
+
+window.buscarEquiposRefrigeracion = function(texto) {
+    const terminoBusqueda = texto.toLowerCase().trim();
+    
+    if (!terminoBusqueda) {
+        mostrarEquiposRefrigeracion(equiposCacheRefrigeracion);
+        return;
+    }
+    
+    const equiposFiltrados = equiposCacheRefrigeracion.filter(equipo => {
+        return equipo.nombre.toLowerCase().includes(terminoBusqueda) ||
+               equipo.marca.toLowerCase().includes(terminoBusqueda) ||
+               (equipo.tipo && equipo.tipo.toLowerCase().includes(terminoBusqueda)) ||
+               equipo.modelo.toLowerCase().includes(terminoBusqueda) ||
+               equipo.serie.toLowerCase().includes(terminoBusqueda) ||
+               equipo.ubicacion.toLowerCase().includes(terminoBusqueda) ||
+               equipo.clienteNombre.toLowerCase().includes(terminoBusqueda) ||
+               (equipo.capacidad && equipo.capacidad.toLowerCase().includes(terminoBusqueda)) ||
+               (equipo.refrigerante && equipo.refrigerante.toLowerCase().includes(terminoBusqueda));
+    });
+    
+    mostrarEquiposRefrigeracion(equiposFiltrados);
 }
 
 // Funciones de eliminación
@@ -2545,13 +2749,13 @@ window.eliminarClienteRefrigeracion = function(id) {
             return db.collection('clientes-refrigeracion').doc(id).delete();
         })
         .then(() => {
-            alert('Cliente eliminado');
+            mostrarToast('Cliente eliminado', 'success');
             cargarClientesRefrigeracion();
             cargarEquiposRefrigeracion();
             cargarClientesEnSelectsRefrigeracion();
         })
         .catch((error) => {
-            alert('Error al eliminar: ' + error.message);
+            mostrarToast('error al eliminar: ' + error.message,'error');
         });
 }
 
@@ -2562,17 +2766,22 @@ window.eliminarEquipoRefrigeracion = function(id) {
     
     db.collection('equipos-refrigeracion').doc(id).delete()
         .then(() => {
-            alert('Equipo eliminado');
+            mostrarToast('Equipo eliminado', 'success');
             cargarEquiposRefrigeracion();
         })
         .catch((error) => {
-            alert('Error al eliminar: ' + error.message);
+            mostrarToast('error al eliminar: ' + error.message, 'error');
         });
 }
 
 // Event listeners para formularios de refrigeración
 document.getElementById('formClienteRefrigeracion').addEventListener('submit', function(e) {
     e.preventDefault();
+
+    // VALIDAR ANTES DE PROCESAR
+    if (!validarFormulario(this)) {
+        return;
+    }
     
     const cliente = {
         nombre: document.getElementById('clienteNombreRefrigeracion').value.toUpperCase(),
@@ -2584,19 +2793,24 @@ document.getElementById('formClienteRefrigeracion').addEventListener('submit', f
     
     db.collection('clientes-refrigeracion').add(cliente)
         .then(() => {
-            alert('Cliente agregado exitosamente');
+            mostrarToast('Cliente agregado exitosamente','success');
             e.target.reset();
             cargarClientesRefrigeracion();
             cargarClientesEnSelectsRefrigeracion();
         })
         .catch((error) => {
-            alert('Error al agregar cliente: ' + error.message);
+            mostrarToast('error al agregar cliente: ' + error.message, 'error');
         });
 });
 
 document.getElementById('formEquipoRefrigeracion').addEventListener('submit', function(e) {
     e.preventDefault();
     
+    // VALIDAR ANTES DE PROCESAR
+    if (!validarFormulario(this)) {
+        return;
+    }
+
     const clienteId = document.getElementById('equipoClienteRefrigeracion').value;
     const clienteNombre = document.getElementById('equipoClienteRefrigeracion').selectedOptions[0].text;
     
@@ -2616,18 +2830,18 @@ document.getElementById('formEquipoRefrigeracion').addEventListener('submit', fu
 
     // Validar que se haya seleccionado un cliente
     if (!clienteId) {
-        mostrarToast('Por favor seleccione un cliente', 'Error');
+        mostrarToast('Por favor seleccione un cliente', 'error');
         return;
     }
     
     db.collection('equipos-refrigeracion').add(equipo)
         .then(() => {
-            alert('Equipo agregado exitosamente');
+            mostrarToast('Equipo agregado exitosamente', 'success');
             e.target.reset();
             cargarEquiposRefrigeracion();
         })
         .catch((error) => {
-            alert('Error al agregar equipo: ' + error.message);
+            mostrarToast('error al agregar: ' + error.message, 'error');
         });
 });
 
@@ -2668,8 +2882,8 @@ function cargarTecnicos() {
             });
         })
         .catch((error) => {
-            console.error('Error al cargar técnicos:', error);
-            alert('Error al cargar técnicos: ' + error.message);
+            console.error('error al cargar técnicos:', error);
+            mostrarToast('error al cargar técnicos: ' + error.message, 'error');
         });
 }
 
@@ -2698,13 +2912,17 @@ if (inputFirmaTecnico) {
 document.getElementById('formTecnico').addEventListener('submit', function(e) {
     e.preventDefault();
     
+        // VALIDAR ANTES DE PROCESAR
+    if (!validarFormulario(this)) {
+        return;
+    }
     const nombre = document.getElementById('tecnicoNombre').value.toUpperCase();
     const cargo = document.getElementById('tecnicoCargo').value.toUpperCase();
     const registroInvima = document.getElementById('tecnicoRegistroInvima').value.toUpperCase();
     const inputFirma = document.getElementById('tecnicoFirma');
     
     if (!inputFirma.files[0]) {
-        alert('Por favor seleccione una firma');
+        mostrarToast('Por favor seleccione una firma', 'info');
         return;
     }
     
@@ -2722,14 +2940,14 @@ document.getElementById('formTecnico').addEventListener('submit', function(e) {
         
         db.collection('tecnicos').add(tecnico)
             .then(() => {
-                alert('Técnico agregado exitosamente');
+                mostrarToast('Técnico agregado exitosamente', 'success');
                 document.getElementById('formTecnico').reset();
                 document.getElementById('firmaPreviewTecnico').innerHTML = '';
                 cargarTecnicos();
                 cargarTecnicosEnSelects(); // Actualizar los selects de reportes
             })
             .catch((error) => {
-                alert('Error al agregar técnico: ' + error.message);
+                mostrarToast('error al agregar técnico: ' + error.message, 'error');
             });
     };
     
@@ -2744,11 +2962,11 @@ window.eliminarTecnico = function(id) {
     
     db.collection('tecnicos').doc(id).delete()
         .then(() => {
-            alert('Técnico eliminado');
+            mostrarToast('Técnico eliminado','success');
             cargarTecnicos();
         })
         .catch((error) => {
-            alert('Error al eliminar técnico: ' + error.message);
+            mostrarToast('error al eliminar técnico: ' + error.message, 'success');
         });
 }
 
@@ -2777,7 +2995,7 @@ window.editarTecnico = function(id) {
             }
         })
         .catch((error) => {
-            alert('Error al cargar técnico: ' + error.message);
+            mostrarToast('error al cargar técnico: ' + error.message, 'error');
         });
 }
 
@@ -2813,6 +3031,10 @@ if (inputFirmaEditarTecnico) {
 document.getElementById('formEditarTecnico').addEventListener('submit', function(e) {
     e.preventDefault();
     
+        // VALIDAR ANTES DE PROCESAR
+    if (!validarFormulario(this)) {
+        return;
+    }
     const id = document.getElementById('editTecnicoId').value;
     const tecnicoActualizado = {
         nombre: document.getElementById('editTecnicoNombre').value.toUpperCase(),
@@ -2829,26 +3051,26 @@ document.getElementById('formEditarTecnico').addEventListener('submit', function
             
             db.collection('tecnicos').doc(id).update(tecnicoActualizado)
                 .then(() => {
-                    alert('Técnico actualizado exitosamente');
+                    mostrarToast('Técnico actualizado exitosamente', 'success');
                     cerrarModalTecnico();
                     cargarTecnicos();
                     cargarTecnicosEnSelects();
                 })
                 .catch((error) => {
-                    alert('Error al actualizar: ' + error.message);
+                    mostrarToast('error al actualizar: ' + error.message, 'error');
                 });
         };
         reader.readAsDataURL(inputFirma.files[0]);
     } else {
         db.collection('tecnicos').doc(id).update(tecnicoActualizado)
             .then(() => {
-                alert('Técnico actualizado exitosamente');
+                amostrarToast('Técnico actualizado exitosamente', 'success');
                 cerrarModalTecnico();
                 cargarTecnicos();
                 cargarTecnicosEnSelects();
             })
             .catch((error) => {
-                alert('Error al actualizar: ' + error.message);
+                mostrarToast('error al actualizar: ' + error.message, 'error');
             });
     }
 });
@@ -2887,7 +3109,7 @@ function cargarTecnicosEnSelects() {
             });
         })
         .catch((error) => {
-            console.error('Error al cargar técnicos en selects:', error);
+            console.error('error al cargar técnicos en selects:', error);
         });
 }
 
@@ -2940,8 +3162,8 @@ window.cargarEquiposReporteRefrigeracion = function() {
             });
         })
         .catch((error) => {
-            console.error('Error al cargar equipos:', error);
-            selectEquipo.innerHTML = '<option value="">-- Error al cargar equipos --</option>';
+            console.error('error al cargar equipos:', error);
+            selectEquipo.innerHTML = '<option value="">-- error al cargar equipos --</option>';
         });
 }
 
@@ -2967,7 +3189,7 @@ window.editarClienteRefrigeracion = function(id) {
             }
         })
         .catch((error) => {
-            alert('Error al cargar cliente: ' + error.message);
+            mostrarToast('error al cargar cliente: ' + error.message, 'error');
         });
 }
 
@@ -3015,7 +3237,7 @@ window.editarEquipoRefrigeracion = function(id) {
             }
         })
         .catch((error) => {
-            alert('Error al cargar equipo: ' + error.message);
+            mostrarToast('error al cargar equipo: ' + error.message, 'error');
         });
 }
 
@@ -3029,6 +3251,10 @@ window.cerrarModalEquipoRefrigeracion = function() {
 document.getElementById('formEditarClienteRefrigeracion').addEventListener('submit', function(e) {
     e.preventDefault();
     
+        // VALIDAR ANTES DE PROCESAR
+    if (!validarFormulario(this)) {
+        return;
+    }
     const id = document.getElementById('editClienteIdRefrigeracion').value;
     const clienteActualizado = {
         nombre: document.getElementById('editClienteNombreRefrigeracion').value.toUpperCase(),
@@ -3039,13 +3265,13 @@ document.getElementById('formEditarClienteRefrigeracion').addEventListener('subm
     
     db.collection('clientes-refrigeracion').doc(id).update(clienteActualizado)
         .then(() => {
-            alert('Cliente actualizado exitosamente');
+            mostrarToast('Cliente actualizado exitosamente', 'success');
             cerrarModalClienteRefrigeracion();
             cargarClientesRefrigeracion();
             cargarClientesEnSelectsRefrigeracion();
         })
         .catch((error) => {
-            alert('Error al actualizar: ' + error.message);
+            mostrarToast('error al actualizar: ' + error.message, 'error');
         });
     
 });
@@ -3054,6 +3280,10 @@ document.getElementById('formEditarClienteRefrigeracion').addEventListener('subm
 document.getElementById('formEditarEquipoRefrigeracion').addEventListener('submit', function(e) {
     e.preventDefault();
     
+        // VALIDAR ANTES DE PROCESAR
+    if (!validarFormulario(this)) {
+        return;
+    }
     const id = document.getElementById('editEquipoIdRefrigeracion').value;
     const equipoActualizado = {
         nombre: document.getElementById('editEquipoNombreRefrigeracion').value.toUpperCase(),
@@ -3068,12 +3298,12 @@ document.getElementById('formEditarEquipoRefrigeracion').addEventListener('submi
     
     db.collection('equipos-refrigeracion').doc(id).update(equipoActualizado)
         .then(() => {
-            alert('Equipo actualizado exitosamente');
+            mostrarToast('Equipo actualizado exitosamente', 'success');
             cerrarModalEquipoRefrigeracion();
             cargarEquiposRefrigeracion();
         })
         .catch((error) => {
-            alert('Error al actualizar: ' + error.message);
+            mostrarToast('error al actualizar: ' + error.message, 'error');
         });
 });
 
@@ -3082,7 +3312,13 @@ document.getElementById('formEditarEquipoRefrigeracion').addEventListener('submi
 // ============================================
 
 document.getElementById('formReporteRefrigeracion').addEventListener('submit', async function(e) {
-    e.preventDefault();
+   e.preventDefault();
+   // VALIDAR FORMULARIO ANTES DE GENERAR PDF
+    if (!validarFormulario(this)) {
+        return;
+    }
+
+    
     await generarPDFRefrigeracion();
 });
 
@@ -3096,7 +3332,7 @@ async function generarPDFRefrigeracion() {
     const tecnicoId = document.getElementById('reporteTecnicoRefrigeracion').value;
     
     if (!tecnicoId) {
-        alert('Por favor seleccione un técnico');
+        mostrarToast('Por favor seleccione un técnico', 'warning');
         return;
     }
     
@@ -3112,7 +3348,7 @@ async function generarPDFRefrigeracion() {
         // Obtener datos del técnico
         const tecnicoDoc = await db.collection('tecnicos').doc(tecnicoId).get();
         if (!tecnicoDoc.exists) {
-            alert('Error: No se encontró el técnico seleccionado');
+            mostrarToast('error: No se encontró el técnico seleccionado', 'error');
             return;
         }
         const tecnicoData = tecnicoDoc.data();
@@ -3139,8 +3375,8 @@ async function generarPDFRefrigeracion() {
         });
         
     } catch (error) {
-        alert('Error al generar PDF: ' + error.message);
-        console.error('Error:', error);
+        mostrarToast('error al generar PDF: ' + error.message, 'error');
+        console.error('error:', error);
     }
 }
 
@@ -3204,7 +3440,7 @@ async function construirPDFRefrigeracion(doc, datos) {
             doc.addImage(logoBase64, 'PNG', pageWidth - margin - 35, y - 15, 39, 30);
         }
     } catch (e) {
-        console.log('Error cargando logo');
+        console.log('error cargando logo');
     }
     
     y += 12;
@@ -3484,7 +3720,7 @@ async function construirPDFRefrigeracion(doc, datos) {
         try {
             doc.addImage(datos.tecnicoData.firma, 'PNG', margin + 45, y + 5, 35, 19);
         } catch (e) {
-            console.log('Error cargando firma del técnico');
+            console.log('error cargando firma del técnico');
         }
     }
     
@@ -3550,7 +3786,7 @@ async function construirPDFRefrigeracion(doc, datos) {
                     try {
                         doc.addImage(imgData, 'JPEG', xFoto, yFoto, 85, 75);
                     } catch (err) {
-                        console.log('Error al agregar imagen');
+                        console.log('error al agregar imagen');
                     }
                     
                     fotosPorFila++;
@@ -3652,7 +3888,7 @@ async function leerArchivoExcelRefrigeracion(file) {
         document.getElementById('btnProcesarExcelRefrigeracion').disabled = equiposDesdeExcelRefrigeracion.length === 0;
         
     } catch (error) {
-        alert('Error al leer el archivo Excel: ' + error.message);
+        mostrarToast('error al leer el archivo Excel: ' + error.message, 'error');
         console.error(error);
     }
 }
@@ -3688,7 +3924,7 @@ window.procesarExcelRefrigeracion = async function() {
     const clienteId = document.getElementById('equipoClienteRefrigeracion').value;
     
     if (!clienteId) {
-        mostrarToast('Por favor seleccione un cliente primero', 'Error');
+        mostrarToast('Por favor seleccione un cliente primero', 'error');
         return;
     }
     
@@ -3731,12 +3967,12 @@ window.procesarExcelRefrigeracion = async function() {
             });
             exitosos++;
         } catch (error) {
-            console.error('Error al agregar equipo:', equipo.nombre, error);
+            console.error('error al agregar equipo:', equipo.nombre, error);
             fallidos++;
         }
     }
     
-    alert(`✅ Proceso completado:\n\n✓ ${exitosos} equipos agregados exitosamente${fallidos > 0 ? `\n✗ ${fallidos} equipos fallaron` : ''}`);
+    mostrarToast(`✅ Proceso completado:\n\n✓ ${exitosos} equipos agregados exitosamente${fallidos > 0 ? `\n✗ ${fallidos} equipos fallaron` : ''}`, 'success');
     
     // Limpiar y recargar
     document.getElementById('archivoExcelRefrigeracion').value = '';
@@ -3753,31 +3989,220 @@ window.procesarExcelRefrigeracion = async function() {
 
 console.log('Funciones de importación Excel para refrigeración cargadas correctamente');
 
-// Función para mostrar Toast
-function mostrarToast(mensaje, tipo = 'info', duracion = 3000) {
-    // Tipos: 'success', 'Error', 'warning', 'info'
+// ============================================
+// FUNCIÓN MOSTRAR TOAST (MEJORADA - SIN DUPLICADOS)
+// ============================================
+
+let toastActual = null; // Variable global para controlar el toast actual
+
+function mostrarToast(mensaje, tipo = 'info', duracion = 1500) {
+    // Tipos: 'success', 'error', 'warning', 'info'
     
     const iconos = {
         success: '✅',
-        Error: '❌',
+        error: '❌',
         warning: '⚠️',
         info: 'ℹ️'
     };
     
+    // Si ya hay un toast visible, eliminarlo primero
+    if (toastActual && document.body.contains(toastActual)) {
+        toastActual.classList.remove('show');
+        setTimeout(() => {
+            if (document.body.contains(toastActual)) {
+                document.body.removeChild(toastActual);
+            }
+        }, 100);
+    }
+    
+    // Crear nuevo elemento toast
     const toast = document.createElement('div');
     toast.className = `toast ${tipo}`;
     toast.innerHTML = `
-        <span class="icon">${iconos[tipo]}</span>
-        <span class="message">${mensaje}</span>
+        <span class="toast-icon">${iconos[tipo]}</span>
+        <span class="toast-message">${mensaje}</span>
     `;
     
+    // Guardar referencia al toast actual
+    toastActual = toast;
+    
+    // Agregar al body
     document.body.appendChild(toast);
+    
+    // Mostrar con animación
+    setTimeout(() => {
+        toast.classList.add('show');
+    }, 10);
     
     // Eliminar después de la duración
     setTimeout(() => {
-        toast.classList.add('closing');
+        toast.classList.remove('show');
         setTimeout(() => {
-            document.body.removeChild(toast);
+            if (document.body.contains(toast)) {
+                document.body.removeChild(toast);
+                // Limpiar referencia si es el toast actual
+                if (toastActual === toast) {
+                    toastActual = null;
+                }
+            }
         }, 300);
     }, duracion);
+}
+
+// ============================================
+// TOGGLE LISTAS DESPLEGABLES
+// ============================================
+
+window.toggleLista = function(idLista) {
+    // El contenedor es el padre del idLista
+    const contenedor = document.getElementById('contenedor' + idLista.charAt(0).toUpperCase() + idLista.slice(1));
+    const icono = document.getElementById('icon' + idLista.charAt(0).toUpperCase() + idLista.slice(1));
+    
+    if (contenedor && icono) {
+        contenedor.classList.toggle('oculta-lista');
+        icono.classList.toggle('rotado');
+    }
+}
+// ============================================
+// VALIDACIÓN PERSONALIZADA DE FORMULARIOS
+// ============================================
+
+function validarFormulario(formulario) {
+    // 1. Validar campos con required (inputs, selects, textareas)
+    const campos = formulario.querySelectorAll('input[required], select[required], textarea[required]');
+    
+    for (let campo of campos) {
+        // Saltar radio buttons, los validamos después
+        if (campo.type === 'radio') continue;
+        
+        const valor = campo.value ? campo.value.trim() : '';
+        
+        // Verificar si el campo está vacío
+        if (!valor) {
+            let nombreCampo = 'Debes diligenciar este campo';
+            let mes = '';
+            
+            const label = document.querySelector(`label[for="${campo.id}"]`);
+            if (label) {
+                nombreCampo = label.textContent.replace(':', '').trim();
+                mes = 'Por favor selecciona';
+            } else if (campo.tagName === 'SELECT') {
+                nombreCampo = 'Debes seleccionar una opción';
+            }
+            
+            mostrarToast(`${mes} ${nombreCampo}`, 'warning');
+            
+            campo.focus();
+            campo.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            
+            campo.classList.add('campo-error');
+            setTimeout(() => {
+                campo.classList.remove('campo-error');
+            }, 2000);
+            
+            return false;
+        }
+        
+        
+        // Validar email
+        if (campo.type === 'email' && valor) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(valor)) {
+                mostrarToast('Por favor ingresa un correo electrónico válido', 'warning');
+                campo.focus();
+                campo.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                
+                campo.classList.add('campo-error');
+                setTimeout(() => {
+                    campo.classList.remove('campo-error');
+                }, 2000);
+                
+                return false;
+            }
+        }
+        
+    }
+    
+    // 2. Validar grupos de radio buttons con required
+    const gruposRadio = {};
+    const radiosRequired = formulario.querySelectorAll('input[type="radio"][required]');
+    
+    radiosRequired.forEach(radio => {
+        if (!gruposRadio[radio.name]) {
+            gruposRadio[radio.name] = radio;
+        }
+    });
+    
+    for (let nombre in gruposRadio) {
+        const radioChecked = formulario.querySelector(`input[name="${nombre}"]:checked`);
+        
+        if (!radioChecked) {
+            let nombreGrupo = nombre;
+            
+            if (nombre === 'servicioPor') {
+                nombreGrupo = 'tipo se servicio';
+            } else if (nombre === 'tipoMto') {
+                nombreGrupo = 'tipo de mantenimiento';
+            } else if (nombre === 'estadoEquipo') {
+                nombreGrupo = 'estado del equipo';
+            } else if (nombre === 'servicioPorRefrigeracion') {
+                nombreGrupo = 'tipo de servicio';
+            } else if (nombre === 'tipoMtoRefrigeracion') {
+                nombreGrupo = 'tipo de mantenimiento';
+            } else if (nombre === 'estadoEquipoRefrigeracion') {
+                nombreGrupo = 'estado del equipo';
+            }
+            
+            mostrarToast(`Por favor selecciona el ${nombreGrupo}`, 'warning');
+            
+            const seccion = gruposRadio[nombre].closest('.seccion');
+            if (seccion) {
+                seccion.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                seccion.classList.add('seccion-error');
+                setTimeout(() => {
+                    seccion.classList.remove('seccion-error');
+                }, 2000);
+            }
+            
+            return false;
+        }
+    }
+    
+    // 3. Validar grupos de checkboxes requeridos
+    const gruposCheckbox = formulario.querySelectorAll('[data-required-group]');
+    const gruposValidados = new Set();
+    
+    for (let checkbox of gruposCheckbox) {
+        const grupoNombre = checkbox.getAttribute('data-required-group');
+        
+        if (!gruposValidados.has(grupoNombre)) {
+            gruposValidados.add(grupoNombre);
+            
+            const checkboxesDelGrupo = formulario.querySelectorAll(`[data-required-group="${grupoNombre}"]`);
+            const algunoMarcado = Array.from(checkboxesDelGrupo).some(cb => cb.checked);
+            
+            if (!algunoMarcado) {
+                let nombreGrupo = grupoNombre;
+                
+                if (grupoNombre === 'tareas') {
+                    nombreGrupo = 'al menos una tarea';
+                }
+                
+                mostrarToast(`Por favor selecciona ${nombreGrupo}`, 'warning');
+                
+                const seccion = checkbox.closest('.seccion');
+                if (seccion) {
+                    seccion.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    seccion.classList.add('seccion-error');
+                    setTimeout(() => {
+                        seccion.classList.remove('seccion-error');
+                    }, 2000);
+                }
+                
+                return false;
+            }
+        }
+    }
+    
+    return true;
 }
