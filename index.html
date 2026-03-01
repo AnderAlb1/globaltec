@@ -16,7 +16,7 @@
             <h1>⚙️ GlobalTecServices</h1>
             <h2>Iniciar Sesión</h2>
             
-            <form id="formLogin">
+            <form id="formLogin" novalidate>
                 <label>Correo Electrónico:</label>
                 <input type="email" id="loginEmail" required placeholder="usuario@ejemplo.com">
                 
@@ -110,7 +110,7 @@
             
             <div class="formulario-card">
                 <h2>Agregar Nuevo Cliente</h2>
-                <form id="formCliente">
+                <form id="formCliente" novalidate>
                     <label>Nombre:</label>
                     <input type="text" id="clienteNombre" required>
                     
@@ -128,18 +128,28 @@
             </div>
 
             <div class="lista-card">
-                <h2>Clientes Registrados</h2>
-                
-                <!-- BUSCADOR DE CLIENTES -->
-                <div class="buscador-container">
-                    <input type="text" 
-                           id="buscarCliente" 
-                           class="input-buscador" 
-                           placeholder="🔍 Buscar por nombre, dirección, teléfono o correo..."
-                           onkeyup="buscarClientes(this.value)">
+                <!-- HEADER DESPLEGABLE -->
+                <div class="lista-header" onclick="toggleLista('listaClientes')">
+                    <div class="lista-header-izquierda">
+                        <h2>Mostrar Clientes Registrados</h2>
+                        <span class="contador-badge" id="contadorClientes">0</span>
+                        <span class="toggle-icon" id="iconListaClientes">⮯</span>
+                    </div>
                 </div>
                 
-                <div id="listaClientes"></div>
+                <!-- CONTENIDO DESPLEGABLE -->
+                <div id="contenedorListaClientes" class="lista-contenido oculta-lista">
+                    <!-- BUSCADOR DE CLIENTES -->
+                    <div class="buscador-container">
+                        <input type="text" 
+                            id="buscarCliente" 
+                            class="input-buscador" 
+                            placeholder="🔍 Buscar por nombre, dirección, teléfono o correo..."
+                            onkeyup="buscarClientes(this.value)">
+                    </div>
+                    
+                    <div id="listaClientes"></div>
+                </div>
             </div>
         </div>
     </div>
@@ -149,7 +159,7 @@
         <div class="modal-content">
             <span class="close" onclick="cerrarModalCliente()">&times;</span>
             <h2>Editar Cliente</h2>
-            <form id="formEditarCliente">
+            <form id="formEditarCliente" novalidate>
                 <input type="hidden" id="editClienteId">
                 
                 <label>Nombre:</label>
@@ -162,7 +172,7 @@
                 <input type="tel" id="editClienteTelefono" required>
                 
                 <label>Correo Electrónico:</label>
-                <input type="email" id="editClienteCorreo" required>
+                <input type="email" id="editClienteCorreo">
                                 
                 <button type="submit">Guardar Cambios</button>
             </form>
@@ -174,7 +184,7 @@
         <div class="modal-content">
             <span class="close" onclick="cerrarModalEquipo()">&times;</span>
             <h2>Editar Equipo</h2>
-            <form id="formEditarEquipo">
+            <form id="formEditarEquipo" novalidate>
                 <input type="hidden" id="editEquipoId">
                 
                 <label>Cliente:</label>
@@ -210,7 +220,7 @@
     <div class="modal-content">
         <span class="close" onclick="cerrarModalClienteRefrigeracion()">&times;</span>
         <h2>Editar Cliente - Refrigeración</h2>
-        <form id="formEditarClienteRefrigeracion">
+        <form id="formEditarClienteRefrigeracion" novalidate>
             <input type="hidden" id="editClienteIdRefrigeracion">
             
             <label>Nombre:</label>
@@ -223,7 +233,7 @@
             <input type="tel" id="editClienteTelefonoRefrigeracion" required>
             
             <label>Correo Electrónico:</label>
-            <input type="email" id="editClienteCorreoRefrigeracion" required>
+            <input type="email" id="editClienteCorreoRefrigeracion">
             
             <button type="submit">Guardar Cambios</button>
         </form>
@@ -235,7 +245,7 @@
     <div class="modal-content">
         <span class="close" onclick="cerrarModalEquipoRefrigeracion()">&times;</span>
         <h2>Editar Equipo - Refrigeración</h2>
-        <form id="formEditarEquipoRefrigeracion">
+        <form id="formEditarEquipoRefrigeracion" novalidate>
             <input type="hidden" id="editEquipoIdRefrigeracion">
             
             <label>Cliente:</label>
@@ -277,7 +287,7 @@
     <div class="modal-content">
         <span class="close" onclick="cerrarModalTecnico()">&times;</span>
         <h2>Editar Técnico</h2>
-        <form id="formEditarTecnico">
+        <form id="formEditarTecnico" novalidate>
             <input type="hidden" id="editTecnicoId">
             
             <label>Nombre Completo:</label>
@@ -328,7 +338,7 @@
                 
                 <!-- FORMULARIO MANUAL (VISIBLE POR DEFECTO) -->
                 <div id="formularioManual">
-                    <form id="formEquipo">
+                    <form id="formEquipo" novalidate>
                         <label>Nombre del Equipo:</label>
                         <input type="text" id="equipoNombre" placeholder="Ej: UNIDAD ODONTOLÓGICA" required>
                         
@@ -374,18 +384,25 @@
             </div>
 
             <div class="lista-card">
-                <h2>Equipos Registrados</h2>
-                
-                <!-- BUSCADOR DE EQUIPOS -->
-                <div class="buscador-container">
-                    <input type="text" 
-                           id="buscarEquipo" 
-                           class="input-buscador" 
-                           placeholder="🔍 Buscar por nombre, marca, modelo, serie, ubicación o cliente..."
-                           onkeyup="buscarEquipos(this.value)">
+                <div class="lista-header" onclick="toggleLista('listaEquipos')">
+                    <div class="lista-header-izquierda">
+                        <h2>Mostar Equipos Registrados</h2>
+                        <span class="contador-badge" id="contadorEquipos">0</span>
+                        <span class="toggle-icon" id="iconListaEquipos">⮯</span>
+                    </div>
                 </div>
                 
-                <div id="listaEquipos"></div>
+                <div id="contenedorListaEquipos" class="lista-contenido oculta-lista">
+                    <div class="buscador-container">
+                        <input type="text" 
+                            id="buscarEquipo" 
+                            class="input-buscador" 
+                            placeholder="🔍 Buscar por nombre, marca, modelo, serie, ubicación o cliente..."
+                            onkeyup="buscarEquipos(this.value)">
+                    </div>
+                    
+                    <div id="listaEquipos"></div>
+                </div>
             </div>
         </div>
     </div>
@@ -395,14 +412,14 @@
         <div class="contenedor">
             <h1>Generar Reporte de Servicio - Biomédico</h1>
             
-            <form id="formReporte">
+            <form id="formReporte" novalidate>
                 
                 <!-- Selección de Cliente y Equipo -->
                 <div class="seccion">
                     <h2>1. Datos Básicos</h2>
                     
                     <label>Seleccionar Cliente:</label>
-                    <select id="reporteCliente" required onchange="cargarEquiposReporte()">
+                    <select id="reporteCliente" required onchange="cargarEquipos()">
                         <option value="">-- Seleccione un cliente --</option>
                     </select>
                     
@@ -465,15 +482,15 @@
                 <div class="seccion">
                     <h2>6. Tareas Ejecutadas</h2>
                     <div class="checkbox-group">
-                        <label><input type="checkbox" value="AJUSTE"> AJUSTE</label>
-                        <label><input type="checkbox" value="CONFIGURACIÓN"> CONFIGURACIÓN</label>
-                        <label><input type="checkbox" value="REPARACIÓN"> REPARACIÓN</label>
-                        <label><input type="checkbox" value="EVALUACIÓN"> EVALUACIÓN</label>
-                        <label><input type="checkbox" value="LUBRICACIÓN"> LUBRICACIÓN</label>
-                        <label><input type="checkbox" value="TEST TEMPERATURA"> TEST TEMPERATURA</label>
-                        <label><input type="checkbox" value="LIMPIEZA INTERNA"> LIMPIEZA INTERNA</label>
-                        <label><input type="checkbox" value="LIMPIEZA EXTERNA"> LIMPIEZA EXTERNA</label>
-                        <label><input type="checkbox" value="VERIFICACION DE FUGAS"> VERIFICACION DE FUGAS</label>
+                        <label><input type="checkbox" value="AJUSTE" data-required-group="tareas"> AJUSTE</label>
+                        <label><input type="checkbox" value="CONFIGURACIÓN" data-required-group="tareas"> CONFIGURACIÓN</label>
+                        <label><input type="checkbox" value="REPARACIÓN" data-required-group="tareas"> REPARACIÓN</label>
+                        <label><input type="checkbox" value="EVALUACIÓN" data-required-group="tareas"> EVALUACIÓN</label>
+                        <label><input type="checkbox" value="LUBRICACIÓN" data-required-group="tareas"> LUBRICACIÓN</label>
+                        <label><input type="checkbox" value="TEST TEMPERATURA" data-required-group="tareas"> TEST TEMPERATURA</label>
+                        <label><input type="checkbox" value="LIMPIEZA INTERNA" data-required-group="tareas"> LIMPIEZA INTERNA</label>
+                        <label><input type="checkbox" value="LIMPIEZA EXTERNA" data-required-group="tareas"> LIMPIEZA EXTERNA</label>
+                        <label><input type="checkbox" value="VERIFICACION DE FUGAS" data-required-group="tareas"> VERIFICACION DE FUGAS</label>
                     </div>
                 </div>
 
@@ -525,7 +542,7 @@
                     
                     <div class="formulario-card">
                         <h2>Logo de la Empresa</h2>
-                        <form id="formConfiguracionLogo">
+                        <form id="formConfiguracionLogo" novalidate>
                             <label>Logo de la empresa:</label>
                             <div class="file-input-wrapper">
                                 <input type="file" id="logoEmpresa" accept="image/*">
@@ -544,7 +561,7 @@
                     
                     <div class="formulario-card">
                         <h2>Agregar Nuevo Técnico</h2>
-                        <form id="formTecnico">
+                        <form id="formTecnico" novalidate>
                             <label>Nombre Completo:</label>
                             <input type="text" id="tecnicoNombre" required>
                             
@@ -578,7 +595,7 @@
                     <div id="solo-admin-usuarios" style="display: none;">
                         <div class="formulario-card">
                             <h2>Crear Nuevo Usuario</h2>
-                            <form id="formUsuario">
+                            <form id="formUsuario" novalidate>
                                 <label>Correo Electrónico:</label>
                                 <input type="email" id="usuarioEmail" required placeholder="usuario@ejemplo.com">
                                 
@@ -615,7 +632,7 @@
             
             <div class="formulario-card">
                 <h2>Agregar Nuevo Cliente</h2>
-                <form id="formClienteRefrigeracion">
+                <form id="formClienteRefrigeracion" novalidate>
                     <label>Nombre:</label>
                     <input type="text" id="clienteNombreRefrigeracion" required>
                     
@@ -633,21 +650,31 @@
             </div>
 
             <div class="lista-card">
-                <h2>Clientes Registrados</h2>
-                
-                <div class="buscador-container">
-                    <input type="text" 
-                           id="buscarClienteRefrigeracion" 
-                           class="input-buscador" 
-                           placeholder="🔍 Buscar por nombre, dirección, teléfono o correo..."
-                           onkeyup="buscarClientesRefrigeracion(this.value)">
+                <!-- HEADER DESPLEGABLE -->
+                <div class="lista-header" onclick="toggleLista('listaClientesRefrigeracion')">
+                    <div class="lista-header-izquierda">
+                        <h2>Mostrar Clientes Registrados</h2>
+                        <span class="contador-badge" id="contadorClientesRefrigeracion">0</span>
+                        <span class="toggle-icon" id="iconListaClientesRefrigeracion">⮯</span>
+                    </div>
                 </div>
                 
-                <div id="listaClientesRefrigeracion"></div>
+                <!-- CONTENIDO DESPLEGABLE -->
+                <div id="contenedorListaClientesRefrigeracion" class="lista-contenido oculta-lista">
+                    <div class="buscador-container">
+                        <input type="text" 
+                            id="buscarClienteRefrigeracion" 
+                            class="input-buscador" 
+                            placeholder="🔍 Buscar por nombre, dirección, teléfono o correo..."
+                            onkeyup="buscarClientesRefrigeracion(this.value)">
+                    </div>
+                    
+                    <div id="listaClientesRefrigeracion"></div>
+                </div>
             </div>
         </div>
     </div>
-
+<div id="listaClientesRefrigeracion"></div>
     <!-- SECCIÓN: EQUIPOS REFRIGERACIÓN -->
     <div id="seccion-equipos-refrigeracion" class="seccion-contenido oculto">
         <div class="contenedor">
@@ -673,7 +700,7 @@
                     </select>
 
 
-                <form id="formEquipoRefrigeracion">
+                <form id="formEquipoRefrigeracion" novalidate>
                     
                     <label>Nombre del Equipo:</label>
                     <input type="text" id="equipoNombreRefrigeracion" required >
@@ -725,17 +752,27 @@
             </div>
 
             <div class="lista-card">
-                <h2>Equipos Registrados</h2>
-                
-                <div class="buscador-container">
-                    <input type="text" 
-                           id="buscarEquipoRefrigeracion" 
-                           class="input-buscador" 
-                           placeholder="🔍 Buscar por nombre, marca, modelo o serie..."
-                           onkeyup="buscarEquiposRefrigeracion(this.value)">
+                <!-- HEADER DESPLEGABLE -->
+                <div class="lista-header" onclick="toggleLista('listaEquiposRefrigeracion')">
+                    <div class="lista-header-izquierda">
+                        <h2>Mostar Equipos Registrados</h2>
+                        <span class="contador-badge" id="contadorEquiposRefrigeracion">0</span>
+                        <span class="toggle-icon" id="iconListaEquiposRefrigeracion">⮯</span>
+                    </div>
                 </div>
                 
-                <div id="listaEquiposRefrigeracion"></div>
+                <!-- CONTENIDO DESPLEGABLE -->
+                <div id="contenedorListaEquiposRefrigeracion" class="lista-contenido oculta-lista">
+                    <div class="buscador-container">
+                        <input type="text" 
+                            id="buscarEquipoRefrigeracion" 
+                            class="input-buscador" 
+                            placeholder="🔍 Buscar por nombre, marca, modelo, serie, ubicación o cliente..."
+                            onkeyup="buscarEquiposRefrigeracion(this.value)">
+                    </div>
+                    
+                    <div id="listaEquiposRefrigeracion"></div>
+                </div>
             </div>
         </div>
     </div>
@@ -745,7 +782,7 @@
         <div class="contenedor">
             <h1>Generar Reporte de Servicio - Refrigeración</h1>
             
-            <form id="formReporteRefrigeracion">
+            <form id="formReporteRefrigeracion" novalidate>
                 <div class="seccion">
                     <h2>1. Datos Básicos</h2>
                     <label>Cliente:</label>
