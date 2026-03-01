@@ -1334,8 +1334,10 @@ async function construirPDF(doc, datos) {
     doc.setFont(undefined, 'normal');
     const nombreLineas = doc.splitTextToSize(datos.cliente.nombre, col1Width - 6);
     nombreLineas.forEach((linea, index) => {
-        doc.text(linea, col11X + 3, yInterno + 4 + (index * 3.5));
+        doc.text(linea, col1X + 3, yInterno + 4 + (index * 3.5));
     });
+
+
 
     yInterno += 4 + (nombreLineas.length * 3.5);
     doc.setFont(undefined, 'bold');
@@ -1358,7 +1360,9 @@ async function construirPDF(doc, datos) {
     doc.text('CORREO ELECTRÓNICO:', col1X + 3, yInterno);
     doc.setFont(undefined, 'normal');
     const correoLineas = doc.splitTextToSize(datos.cliente.correo, col1Width - 6);
-    doc.text(correoLineas[0] || '', col1X + 3, yInterno + 4);
+    correoLineas.forEach((linea, index) => {
+        doc.text(linea, col1X + 3, yInterno + 4 + (index * 3.5));
+    });
     
     // Rectángulo 2: DATOS DEL EQUIPO
     doc.setFillColor(colorAzulClaro[0], colorAzulClaro[1], colorAzulClaro[2]);
@@ -1919,8 +1923,8 @@ if (datos.verificacionParametros.tipo === 'LAMPARA') {
         }
     }
     
-    // Descargar
-    const nombreArchivo = `Reporte_${datos.cliente.nombre}_${datos.equipo.nombre}_${datos.fecha}.pdf`.replace(/ /g, '_');
+    // Guardar pdf Biomedico
+    const nombreArchivo = `REPORTE_${datos.fecha}_${datos.equipo.nombre}_${datos.equipo.marca}_${datos.equipo.ubicacion}_${datos.cliente.nombre}.pdf`.replace(/ /g, '_');
     doc.save(nombreArchivo);
     
 }
@@ -3567,7 +3571,7 @@ async function construirPDFRefrigeracion(doc, datos) {
     }
     
     // Guardar PDF
-    const nombreArchivo = `Reporte_Refrigeracion_${datos.cliente.nombre}_${datos.fecha}.pdf`;
+    const nombreArchivo = `REPORTE_${datos.fecha}_${datos.equipo.nombre}_${datos.equipo.tipo}_${datos.equipo.ubicacion}.pdf`.replace(/ /g, '_');
     doc.save(nombreArchivo);
 }
 
