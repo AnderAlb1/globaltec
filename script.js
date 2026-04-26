@@ -800,7 +800,7 @@ document.getElementById('reporteCliente').addEventListener('change', function() 
             equipos.forEach(equipo => {
                 const option = document.createElement('option');
                 option.value = equipo.id;
-                option.textContent = `${equipo.nombre} - ${equipo.marca} (${equipo.serie})`;
+                option.textContent = `${equipo.nombre} - ${equipo.marca} ${equipo.serie}`;
                 selectEquipo.appendChild(option);
             });
         })
@@ -1961,7 +1961,7 @@ if (datos.verificacionParametros.tipo === 'LAMPARA') {
     }
     
     // Guardar pdf Biomedico
-    const nombreArchivo = `REPORTE_${datos.fecha}_${datos.equipo.nombre}_${datos.equipo.marca}_${datos.equipo.ubicacion}_${datos.cliente.nombre}.pdf`.replace(/ /g, '_');
+    const nombreArchivo = `REPORTE_${datos.fecha}_${datos.equipo.nombre}_${datos.equipo.marca}_${datos.equipo.serie}_${datos.cliente.nombre}.pdf`.replace(/ /g, '_');
     doc.save(nombreArchivo);
     
 }
