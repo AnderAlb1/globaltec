@@ -787,7 +787,9 @@ document.getElementById('reporteCliente').addEventListener('change', function() 
                     id: doc.id,
                     nombre: equipo.nombre,
                     marca: equipo.marca,
-                    ubicacion: equipo.serie
+                    serie: equipo.serie,
+                    ubicacion: equipo.ubicacion
+                    
                 });
             });
             
