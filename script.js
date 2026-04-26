@@ -787,7 +787,7 @@ document.getElementById('reporteCliente').addEventListener('change', function() 
                     id: doc.id,
                     nombre: equipo.nombre,
                     marca: equipo.marca,
-                    ubicacion: equipo.ubicacion
+                    ubicacion: equipo.serie
                 });
             });
             
@@ -798,7 +798,7 @@ document.getElementById('reporteCliente').addEventListener('change', function() 
             equipos.forEach(equipo => {
                 const option = document.createElement('option');
                 option.value = equipo.id;
-                option.textContent = `${equipo.nombre} - ${equipo.marca} (${equipo.ubicacion})`;
+                option.textContent = `${equipo.nombre} - ${equipo.marca} (${equipo.serie})`;
                 selectEquipo.appendChild(option);
             });
         })
