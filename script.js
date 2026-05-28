@@ -3645,24 +3645,20 @@ async function construirPDFRefrigeracion(doc, datos) {
     y += sectionHeight2 +3;
 
   
-	// ======================
+
+			// ======================
 // ACTIVIDAD DE MANTENIMIENTO
 // ======================
 
-doc.setFontSize(8);
-const actividadLines = doc.splitTextToSize(
-    datos.actividadMantenimiento.toUpperCase(), 
-    pageWidth - 2 * margin - 6  // 6 = margen interno (3 a cada lado)
-);
-const lineHeight = 8 * 0.352778 * 1.15; // fontSize * mmPerPt * lineSpacing ≈ 3.25mm
-const actividadHeight = 10 + (actividadLines.length * lineHeight); // 10 = espacio título
+doc.setFillColor(colorAzulClaro[0], colorAzulClaro[1], colorAzulClaro[2]);
+const actividadLines = doc.splitTextToSize(datos.actividadMantenimiento.toUpperCase(), pageWidth - 2 * margin - 10);
+const actividadHeight = Math.max(20, actividadLines.length * 5 + 12);
 
 if (y + actividadHeight > pageHeight - margin) {
     doc.addPage();
     y = margin;
 }
 
-doc.setFillColor(colorAzulClaro[0], colorAzulClaro[1], colorAzulClaro[2]);
 doc.roundedRect(margin, y, pageWidth - 2 * margin, actividadHeight, 3, 3, 'F');
 doc.setDrawColor(150, 150, 150);
 doc.roundedRect(margin, y, pageWidth - 2 * margin, actividadHeight, 3, 3, 'S');
@@ -3682,19 +3678,15 @@ y += actividadHeight + 3;
 // ======================
 
 if (datos.observaciones) {
-    doc.setFontSize(8);
-    const observacionesLines = doc.splitTextToSize(
-        datos.observaciones.toUpperCase(), 
-        pageWidth - 2 * margin - 6
-    );
-    const observacionesHeight = 10 + (observacionesLines.length * lineHeight);
+    doc.setFillColor(colorAzulClaro[0], colorAzulClaro[1], colorAzulClaro[2]);
+    const observacionesLines = doc.splitTextToSize(datos.observaciones.toUpperCase(), pageWidth - 2 * margin - 10);
+    const observacionesHeight = Math.max(20, observacionesLines.length * 5 + 12);
 
     if (y + observacionesHeight > pageHeight - margin) {
         doc.addPage();
         y = margin;
     }
 
-    doc.setFillColor(colorAzulClaro[0], colorAzulClaro[1], colorAzulClaro[2]);
     doc.roundedRect(margin, y, pageWidth - 2 * margin, observacionesHeight, 3, 3, 'F');
     doc.setDrawColor(150, 150, 150);
     doc.roundedRect(margin, y, pageWidth - 2 * margin, observacionesHeight, 3, 3, 'S');
