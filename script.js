@@ -3645,48 +3645,61 @@ async function construirPDFRefrigeracion(doc, datos) {
     y += sectionHeight2 +3;
 
     // ======================
-    // ACTIVIDAD DE MANTENIMIENTO
-    // ======================
-    
+// ACTIVIDAD DE MANTENIMIENTO
+// ======================
+
+const actividadLines = doc.splitTextToSize(datos.actividadMantenimiento.toUpperCase(), pageWidth - 2 * margin - 10);
+const actividadHeight = Math.max(20, actividadLines.length * 4.5 + 14);
+
+// Si el recuadro se sale del margen inferior, saltar página ANTES de dibujarlo
+if (y + actividadHeight > pageHeight - margin) {
+    doc.addPage();
+    y = margin;
+}
+
+doc.setFillColor(colorAzulClaro[0], colorAzulClaro[1], colorAzulClaro[2]);
+doc.roundedRect(margin, y, pageWidth - 2 * margin, actividadHeight, 3, 3, 'F');
+doc.setDrawColor(150, 150, 150);
+doc.roundedRect(margin, y, pageWidth - 2 * margin, actividadHeight, 3, 3, 'S');
+
+doc.setFontSize(9);
+doc.setFont(undefined, 'bold');
+doc.text('ACTIVIDAD DE MANTENIMIENTO', margin + 3, y + 5);
+
+doc.setFontSize(8);
+doc.setFont(undefined, 'normal');
+doc.text(actividadLines, margin + 3, y + 11);
+
+y += actividadHeight + 3;
+
+// ======================
+// OBSERVACIONES
+// ======================
+
+if (datos.observaciones) {
+    const observacionesLines = doc.splitTextToSize(datos.observaciones.toUpperCase(), pageWidth - 2 * margin - 10);
+    const observacionesHeight = Math.max(20, observacionesLines.length * 4.5 + 14);
+
+    if (y + observacionesHeight > pageHeight - margin) {
+        doc.addPage();
+        y = margin;
+    }
+
     doc.setFillColor(colorAzulClaro[0], colorAzulClaro[1], colorAzulClaro[2]);
-    const actividadHeight = Math.max(30, Math.ceil(datos.actividadMantenimiento.length / 80) * 5 + 10);
-    doc.roundedRect(margin, y, pageWidth - 2 * margin, actividadHeight, 3, 3, 'F');
+    doc.roundedRect(margin, y, pageWidth - 2 * margin, observacionesHeight, 3, 3, 'F');
     doc.setDrawColor(150, 150, 150);
-    doc.roundedRect(margin, y, pageWidth - 2 * margin, actividadHeight, 3, 3, 'S');
-    
+    doc.roundedRect(margin, y, pageWidth - 2 * margin, observacionesHeight, 3, 3, 'S');
+
     doc.setFontSize(9);
     doc.setFont(undefined, 'bold');
-    doc.text('ACTIVIDAD DE MANTENIMIENTO', margin + 3, y + 5);
-    
+    doc.text('OBSERVACIONES', margin + 3, y + 5);
+
     doc.setFontSize(8);
     doc.setFont(undefined, 'normal');
-    const actividadLines = doc.splitTextToSize(datos.actividadMantenimiento.toUpperCase(), pageWidth - 2 * margin - 10);
-    doc.text(actividadLines, margin + 3, y + 10);
-    
-    y += actividadHeight + 3;
-    
-    // ======================
-    // OBSERVACIONES
-    // ======================
-    
-    if (datos.observaciones) {
-        doc.setFillColor(colorAzulClaro[0], colorAzulClaro[1], colorAzulClaro[2]);
-        const observacionesHeight = Math.max(20, Math.ceil(datos.observaciones.length / 80) * 5 + 10);
-        doc.roundedRect(margin, y, pageWidth - 2 * margin, observacionesHeight, 3, 3, 'F');
-        doc.setDrawColor(150, 150, 150);
-        doc.roundedRect(margin, y, pageWidth - 2 * margin, observacionesHeight, 3, 3, 'S');
-        
-        doc.setFontSize(9);
-        doc.setFont(undefined, 'bold');
-        doc.text('OBSERVACIONES', margin + 3, y + 5);
-        
-        doc.setFontSize(8);
-        doc.setFont(undefined, 'normal');
-        const observacionesLines = doc.splitTextToSize(datos.observaciones.toUpperCase(), pageWidth - 2 * margin - 10);
-        doc.text(observacionesLines, margin + 3, y + 10);
-        
-        y += observacionesHeight + 3;
-    }
+    doc.text(observacionesLines, margin + 3, y + 11);
+
+    y += observacionesHeight + 3;
+	}
     
     // ======================
     // FIRMAS
