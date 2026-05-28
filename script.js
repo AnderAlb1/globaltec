@@ -3644,14 +3644,19 @@ async function construirPDFRefrigeracion(doc, datos) {
     
     y += sectionHeight2 +3;
 
-    // ======================
+  
+	// ======================
 // ACTIVIDAD DE MANTENIMIENTO
 // ======================
 
-const actividadLines = doc.splitTextToSize(datos.actividadMantenimiento.toUpperCase(), pageWidth - 2 * margin - 10);
-const actividadHeight = Math.max(20, actividadLines.length * 4.5 + 14);
+doc.setFontSize(8);
+const actividadLines = doc.splitTextToSize(
+    datos.actividadMantenimiento.toUpperCase(), 
+    pageWidth - 2 * margin - 6  // 6 = margen interno (3 a cada lado)
+);
+const lineHeight = 8 * 0.352778 * 1.15; // fontSize * mmPerPt * lineSpacing ≈ 3.25mm
+const actividadHeight = 10 + (actividadLines.length * lineHeight); // 10 = espacio título
 
-// Si el recuadro se sale del margen inferior, saltar página ANTES de dibujarlo
 if (y + actividadHeight > pageHeight - margin) {
     doc.addPage();
     y = margin;
@@ -3668,7 +3673,7 @@ doc.text('ACTIVIDAD DE MANTENIMIENTO', margin + 3, y + 5);
 
 doc.setFontSize(8);
 doc.setFont(undefined, 'normal');
-doc.text(actividadLines, margin + 3, y + 11);
+doc.text(actividadLines, margin + 3, y + 10);
 
 y += actividadHeight + 3;
 
@@ -3677,8 +3682,12 @@ y += actividadHeight + 3;
 // ======================
 
 if (datos.observaciones) {
-    const observacionesLines = doc.splitTextToSize(datos.observaciones.toUpperCase(), pageWidth - 2 * margin - 10);
-    const observacionesHeight = Math.max(20, observacionesLines.length * 4.5 + 14);
+    doc.setFontSize(8);
+    const observacionesLines = doc.splitTextToSize(
+        datos.observaciones.toUpperCase(), 
+        pageWidth - 2 * margin - 6
+    );
+    const observacionesHeight = 10 + (observacionesLines.length * lineHeight);
 
     if (y + observacionesHeight > pageHeight - margin) {
         doc.addPage();
@@ -3696,10 +3705,11 @@ if (datos.observaciones) {
 
     doc.setFontSize(8);
     doc.setFont(undefined, 'normal');
-    doc.text(observacionesLines, margin + 3, y + 11);
+    doc.text(observacionesLines, margin + 3, y + 10);
 
     y += observacionesHeight + 3;
-	}
+}
+
     
     // ======================
     // FIRMAS
