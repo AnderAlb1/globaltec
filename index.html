@@ -78,24 +78,27 @@
 
     <!-- MENÚ LATERAL -->
     <nav class="menu-lateral" id="menuLateral">
-        <div class="menu-lateral-content">
-            <button onclick="mostrarServicio('biomedico')" class="btn-menu-lateral activo" data-servicio="biomedico">
-                <span class="icon">⚕️</span> Servicio Biomédico
-            </button>
-            <button onclick="mostrarServicio('refrigeracion')" class="btn-menu-lateral" data-servicio="refrigeracion">
-                <span class="icon">❄️</span> Servicio Refrigeración
-            </button>
-            <button onclick="mostrarSeccion('configuracion')" class="btn-menu-lateral">
-                <span class="icon">⚙️</span> Configuración
-            </button>
-            
-            <div class="menu-divider"></div>
-            
-            <button onclick="cerrarSesion()" class="btn-menu-lateral btn-logout">
-                <span class="icon">🚪</span> Cerrar Sesión
-            </button>
-        </div>
-    </nav>
+    <div class="menu-lateral-content">
+        <button onclick="mostrarSeccion('calendario')" class="btn-menu-lateral" data-seccion="calendario">
+            <span class="icon">📅</span> Programación
+        </button>
+        <button onclick="mostrarServicio('biomedico')" class="btn-menu-lateral" data-servicio="biomedico">
+            <span class="icon">⚕️</span> Servicio Biomédico
+        </button>
+        <button onclick="mostrarServicio('refrigeracion')" class="btn-menu-lateral" data-servicio="refrigeracion">
+            <span class="icon">❄️</span> Servicio Refrigeración
+        </button>
+        <button onclick="mostrarSeccion('configuracion')" class="btn-menu-lateral">
+            <span class="icon">⚙️</span> Configuración
+        </button>
+
+        <div class="menu-divider"></div>
+
+        <button onclick="cerrarSesion()" class="btn-menu-lateral btn-logout">
+            <span class="icon">🚪</span> Cerrar Sesión
+        </button>
+    </div>
+</nav>
 
     <!-- OVERLAY PARA CERRAR MENÚ EN MÓVIL -->
     <div class="menu-overlay" id="menuOverlay" onclick="toggleMenuLateral()"></div>
@@ -122,7 +125,57 @@
                     
                     <label>Correo Electrónico:</label>
                     <input type="email" id="clienteCorreo">
-                                        
+                    
+                    <label>Mantenimiento Preventivo - Ciclo 1:</label>
+                    <select id="clientePrevCiclo1">
+                        <option value="">-- No aplica --</option>
+                        <option value="1">Enero</option>
+                        <option value="2">Febrero</option>
+                        <option value="3">Marzo</option>
+                        <option value="4">Abril</option>
+                        <option value="5">Mayo</option>
+                        <option value="6">Junio</option>
+                        <option value="7">Julio</option>
+                        <option value="8">Agosto</option>
+                        <option value="9">Septiembre</option>
+                        <option value="10">Octubre</option>
+                        <option value="11">Noviembre</option>
+                        <option value="12">Diciembre</option>
+                    </select>
+
+                    <label>Mantenimiento Preventivo - Ciclo 2:</label>
+                    <select id="clientePrevCiclo2">
+                        <option value="">-- No aplica --</option>
+                        <option value="1">Enero</option>
+                        <option value="2">Febrero</option>
+                        <option value="3">Marzo</option>
+                        <option value="4">Abril</option>
+                        <option value="5">Mayo</option>
+                        <option value="6">Junio</option>
+                        <option value="7">Julio</option>
+                        <option value="8">Agosto</option>
+                        <option value="9">Septiembre</option>
+                        <option value="10">Octubre</option>
+                        <option value="11">Noviembre</option>
+                        <option value="12">Diciembre</option>
+                    </select>
+
+                    <label>Metrología - Mes:</label>
+                    <select id="clienteMetrologia">
+                        <option value="">-- No aplica --</option>
+                        <option value="1">Enero</option>
+                        <option value="2">Febrero</option>
+                        <option value="3">Marzo</option>
+                        <option value="4">Abril</option>
+                        <option value="5">Mayo</option>
+                        <option value="6">Junio</option>
+                        <option value="7">Julio</option>
+                        <option value="8">Agosto</option>
+                        <option value="9">Septiembre</option>
+                        <option value="10">Octubre</option>
+                        <option value="11">Noviembre</option>
+                        <option value="12">Diciembre</option>
+                                        </select>                    
                     <button type="submit">Agregar Cliente</button>
                 </form>
             </div>
@@ -173,6 +226,57 @@
                 
                 <label>Correo Electrónico:</label>
                 <input type="email" id="editClienteCorreo">
+
+                <label>Mantenimiento Preventivo - Ciclo 1:</label>
+                <select id="editClientePrevCiclo1">
+                    <option value="">-- No aplica --</option>
+                    <option value="1">Enero</option>
+                    <option value="2">Febrero</option>
+                    <option value="3">Marzo</option>
+                    <option value="4">Abril</option>
+                    <option value="5">Mayo</option>
+                    <option value="6">Junio</option>
+                    <option value="7">Julio</option>
+                    <option value="8">Agosto</option>
+                    <option value="9">Septiembre</option>
+                    <option value="10">Octubre</option>
+                    <option value="11">Noviembre</option>
+                    <option value="12">Diciembre</option>
+                </select>
+
+                <label>Mantenimiento Preventivo - Ciclo 2:</label>
+                <select id="editClientePrevCiclo2">
+                    <option value="">-- No aplica --</option>
+                    <option value="1">Enero</option>
+                    <option value="2">Febrero</option>
+                    <option value="3">Marzo</option>
+                    <option value="4">Abril</option>
+                    <option value="5">Mayo</option>
+                    <option value="6">Junio</option>
+                    <option value="7">Julio</option>
+                    <option value="8">Agosto</option>
+                    <option value="9">Septiembre</option>
+                    <option value="10">Octubre</option>
+                    <option value="11">Noviembre</option>
+                    <option value="12">Diciembre</option>
+                </select>
+
+                <label>Metrología - Mes:</label>
+                <select id="editClienteMetrologia">
+                    <option value="">-- No aplica --</option>
+                    <option value="1">Enero</option>
+                    <option value="2">Febrero</option>
+                    <option value="3">Marzo</option>
+                    <option value="4">Abril</option>
+                    <option value="5">Mayo</option>
+                    <option value="6">Junio</option>
+                    <option value="7">Julio</option>
+                    <option value="8">Agosto</option>
+                    <option value="9">Septiembre</option>
+                    <option value="10">Octubre</option>
+                    <option value="11">Noviembre</option>
+                    <option value="12">Diciembre</option>
+                </select>
                                 
                 <button type="submit">Guardar Cambios</button>
             </form>
@@ -308,6 +412,45 @@
             
             <button type="submit">Guardar Cambios</button>
         </form>
+    </div>
+</div>
+
+<div id="seccion-calendario" class="seccion-contenido oculto">
+    <div class="contenedor calendario-contenedor">
+        <h1>📅 Programación de Mantenimientos</h1>
+
+        <!-- GRID 12 MESES -->
+        <div class="calendario-grid" id="calendarioGrid">
+            <!-- Se genera con JS -->
+        </div>
+
+        <!-- NAVEGACIÓN DE AÑO -->
+        <div class="calendario-nav">
+            <button class="btn-nav-anio" onclick="cambiarAnioCalendario(-1)">&#8592;</button>
+            <span class="anio-actual" id="anioCalendario">2025</span>
+            <button class="btn-nav-anio" onclick="cambiarAnioCalendario(1)">&#8594;</button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL AGREGAR ENTRADA MANUAL AL CALENDARIO -->
+<div id="modalCalendario" class="modal" style="display:none;">
+    <div class="modal-content">
+        <span class="close" onclick="cerrarModalCalendario()">&times;</span>
+        <h2 id="modalCalendarioTitulo">Agregar entrada</h2>
+        <div style="margin-bottom:15px;">
+            <label>Nombre:</label>
+            <input type="text" id="calEntradaNombre" style="text-transform:uppercase;">
+            <label style="margin-top:12px;">Tipo:</label>
+            <select id="calEntradaTipo">
+                <option value="manual-preventivo">Mantenimiento Preventivo</option>
+                <option value="manual-metrologia">Metrología</option>
+                <option value="manual-otro">Otro</option>
+            </select>
+        </div>
+        <button type="button" onclick="guardarEntradaManual()" style="width:100%;padding:12px;background:#4CAF50;color:white;border:none;border-radius:5px;font-size:16px;cursor:pointer;font-weight:bold;">
+            Agregar
+        </button>
     </div>
 </div>
 
@@ -872,7 +1015,7 @@
     <!-- Configuración Firebase -->
     <script src="firebase-config.js"></script>
     <!-- Librería para leer Excel -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>          
     
     <!-- Tu código -->
     <script src="script.js"></script>
