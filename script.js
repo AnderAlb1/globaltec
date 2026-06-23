@@ -1832,7 +1832,7 @@ if (datos.verificacionParametros.tipo === 'LAMPARA') {
         
     if (datos.fallaReportada && datos.fallaReportada.trim() !== '') {
     const fallaLineas = doc.splitTextToSize(datos.fallaReportada, pageWidth - 2 * margin - 10);
-    const fallaHeight = Math.max(16, fallaLineas.length * 3.5 + 10);
+    const fallaHeight = Math.max(16, fallaLineas.length * 2.5 + 10);
 
     doc.setFillColor(colorAzulClaro[0], colorAzulClaro[1], colorAzulClaro[2]);
     doc.roundedRect(margin, y, pageWidth - 2 * margin, fallaHeight, 3, 3, 'F');
@@ -1857,7 +1857,7 @@ if (datos.verificacionParametros.tipo === 'LAMPARA') {
     // ACTIVIDAD DE MANTENIMIENTO
     // =======================================
     const actLineas = doc.splitTextToSize(datos.actividadMantenimiento, pageWidth - 2 * margin - 10);
-    const actHeight = Math.max(16, actLineas.length * 3.5 + 10);
+    const actHeight = Math.max(16, actLineas.length * 2.5 + 10);
 
     doc.setFillColor(colorAzulClaro[0], colorAzulClaro[1], colorAzulClaro[2]);
     doc.roundedRect(margin, y, pageWidth - 2 * margin, actHeight, 3, 3, 'F');
@@ -1882,7 +1882,7 @@ if (datos.verificacionParametros.tipo === 'LAMPARA') {
     
     if (datos.observaciones && datos.observaciones.trim() !== '') {
     const obsLineas = doc.splitTextToSize(datos.observaciones, pageWidth - 2 * margin - 10);
-    const obsHeight = Math.max(16, obsLineas.length * 3.5 + 10);
+    const obsHeight = Math.max(16, obsLineas.length * 2.5 + 10);
 
     doc.setFillColor(colorAzulClaro[0], colorAzulClaro[1], colorAzulClaro[2]);
     doc.roundedRect(margin, y, pageWidth - 2 * margin, obsHeight, 3, 3, 'F');
@@ -3695,7 +3695,7 @@ async function construirPDFRefrigeracion(doc, datos) {
 
 doc.setFillColor(colorAzulClaro[0], colorAzulClaro[1], colorAzulClaro[2]);
 const actividadLines = doc.splitTextToSize(datos.actividadMantenimiento.toUpperCase(), pageWidth - 2 * margin - 10);
-const actividadHeight = Math.max(20, actividadLines.length * 5 + 12);
+const actividadHeight = Math.max(20, actividadLines.length * 2.5 + 12);
 
 if (y + actividadHeight > pageHeight - margin) {
     doc.addPage();
@@ -3723,7 +3723,7 @@ y += actividadHeight + 3;
 if (datos.observaciones) {
     doc.setFillColor(colorAzulClaro[0], colorAzulClaro[1], colorAzulClaro[2]);
     const observacionesLines = doc.splitTextToSize(datos.observaciones.toUpperCase(), pageWidth - 2 * margin - 10);
-    const observacionesHeight = Math.max(20, observacionesLines.length * 5 + 12);
+    const observacionesHeight = Math.max(20, observacionesLines.length * 2.5 + 12);
 
     if (y + observacionesHeight > pageHeight - margin) {
         doc.addPage();
