@@ -1867,7 +1867,7 @@ doc.setFontSize(9);
 doc.setFont(undefined, 'bold');
 doc.text('ACTIVIDAD DE MANTENIMIENTO:', margin + 3, y + 5);
 
-doc.setFontSize(8);
+doc.setFontSize(7);
 doc.setFont(undefined, 'normal');
 doc.text(actLineas, margin + 3, y + 11);
 
@@ -1891,7 +1891,7 @@ if (datos.observaciones && datos.observaciones.trim() !== '') {
     doc.setFont(undefined, 'bold');
     doc.text('OBSERVACIONES:', margin + 3, y + 5);
 
-    doc.setFontSize(8);
+    doc.setFontSize(7);
     doc.setFont(undefined, 'normal');
     doc.text(obsLineas, margin + 3, y + 11);
 
