@@ -1804,26 +1804,27 @@ if (datos.verificacionParametros.tipo === 'LAMPARA') {
         y = y + paramHeight + 3;
         
     } else {
-        // TEXTO NORMAL (para otros equipos)
-        const paramHeight = 22;
+    if (datos.verificacionParametros.texto && datos.verificacionParametros.texto.trim() !== '') {
+        const paramLineas = doc.splitTextToSize(datos.verificacionParametros.texto, pageWidth - 2 * margin - 6);
+        const paramHeight = Math.max(20, paramLineas.length * 4.5 + 12);
+
         doc.setFillColor(colorAzulClaro[0], colorAzulClaro[1], colorAzulClaro[2]);
         doc.roundedRect(margin, y, pageWidth - 2 * margin, paramHeight, 3, 3, 'F');
         doc.setDrawColor(150, 150, 150);
         doc.roundedRect(margin, y, pageWidth - 2 * margin, paramHeight, 3, 3, 'S');
-        
+
         doc.setFontSize(9);
         doc.setFont(undefined, 'bold');
         doc.text('VERIFICACION DE PARAMETROS', margin + 3, y + 5);
 
         doc.setFontSize(8);
         doc.setFont(undefined, 'normal');
-        if (datos.verificacionParametros.texto) {
-            const lineasObs = doc.splitTextToSize(datos.verificacionParametros.texto, pageWidth - 2 * margin - 6);
-            doc.text(lineasObs, margin + 3, y + 10);
-        }
-        
+        doc.text(paramLineas, margin + 3, y + 10);
+
         y += paramHeight + 3;
     }
+}
+
     
     // =======================================
     // FALLA REPORTADA
@@ -1831,7 +1832,7 @@ if (datos.verificacionParametros.tipo === 'LAMPARA') {
     
     if (datos.fallaReportada && datos.fallaReportada.trim() !== '') {
     const fallaLineas = doc.splitTextToSize(datos.fallaReportada, pageWidth - 2 * margin - 6);
-    const fallaHeight = Math.max(16, fallaLineas.length * 4.5 + 12);
+    const fallaHeight = Math.max(16, fallaLineas.length * 5 + 14);
 
     doc.setFillColor(colorAzulClaro[0], colorAzulClaro[1], colorAzulClaro[2]);
     doc.roundedRect(margin, y, pageWidth - 2 * margin, fallaHeight, 3, 3, 'F');
@@ -1844,7 +1845,7 @@ if (datos.verificacionParametros.tipo === 'LAMPARA') {
 
     doc.setFontSize(8);
     doc.setFont(undefined, 'normal');
-    doc.text(fallaLineas, margin + 3, y + 10);
+    doc.text(fallaLineas, margin + 3, y + 11);
 
     y += fallaHeight + 3;
 }
@@ -1855,7 +1856,7 @@ if (datos.verificacionParametros.tipo === 'LAMPARA') {
     // =======================================
     
 const actLineas = doc.splitTextToSize(datos.actividadMantenimiento, pageWidth - 2 * margin - 6);
-const actHeight = Math.max(20, actLineas.length * 4.5 + 12);
+const actHeight = Math.max(20, actLineas.length * 5 + 14);
 
 doc.setFillColor(colorAzulClaro[0], colorAzulClaro[1], colorAzulClaro[2]);
 doc.roundedRect(margin, y, pageWidth - 2 * margin, actHeight, 3, 3, 'F');
@@ -1866,9 +1867,9 @@ doc.setFontSize(9);
 doc.setFont(undefined, 'bold');
 doc.text('ACTIVIDAD DE MANTENIMIENTO:', margin + 3, y + 5);
 
-doc.setFontSize(6);
+doc.setFontSize(8);
 doc.setFont(undefined, 'normal');
-doc.text(actLineas, margin + 3, y + 10);
+doc.text(actLineas, margin + 3, y + 11);
 
 y += actHeight + 3;
 
@@ -1879,7 +1880,7 @@ y += actHeight + 3;
     
 if (datos.observaciones && datos.observaciones.trim() !== '') {
     const obsLineas = doc.splitTextToSize(datos.observaciones, pageWidth - 2 * margin - 6);
-    const obsHeight = Math.max(16, obsLineas.length * 4.5 + 12);
+    const obsHeight = Math.max(16, obsLineas.length * 5 + 14);
 
     doc.setFillColor(colorAzulClaro[0], colorAzulClaro[1], colorAzulClaro[2]);
     doc.roundedRect(margin, y, pageWidth - 2 * margin, obsHeight, 3, 3, 'F');
@@ -1892,7 +1893,7 @@ if (datos.observaciones && datos.observaciones.trim() !== '') {
 
     doc.setFontSize(8);
     doc.setFont(undefined, 'normal');
-    doc.text(obsLineas, margin + 3, y + 10);
+    doc.text(obsLineas, margin + 3, y + 11);
 
     y += obsHeight + 3;
 }
