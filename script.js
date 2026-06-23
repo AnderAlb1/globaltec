@@ -1831,56 +1831,58 @@ if (datos.verificacionParametros.tipo === 'LAMPARA') {
     // =======================================
         
     if (datos.fallaReportada && datos.fallaReportada.trim() !== '') {
-        const fallaLineas = doc.splitTextToSize(datos.fallaReportada, pageWidth - 2 * margin - 6);
-        const fallaHeight = Math.max(16, fallaLineas.length * 4.5 + 12);
+    const fallaLineas = doc.splitTextToSize(datos.fallaReportada, pageWidth - 2 * margin - 10).filter(l => l.trim() !== '');
+    const fallaHeight = Math.max(16, fallaLineas.length * 4.5 + 10);
 
-        doc.setFillColor(colorAzulClaro[0], colorAzulClaro[1], colorAzulClaro[2]);
-        doc.roundedRect(margin, y, pageWidth - 2 * margin, fallaHeight, 3, 3, 'F');
-        doc.setDrawColor(150, 150, 150);
-        doc.roundedRect(margin, y, pageWidth - 2 * margin, fallaHeight, 3, 3, 'S');
+    doc.setFillColor(colorAzulClaro[0], colorAzulClaro[1], colorAzulClaro[2]);
+    doc.roundedRect(margin, y, pageWidth - 2 * margin, fallaHeight, 3, 3, 'F');
+    doc.setDrawColor(150, 150, 150);
+    doc.roundedRect(margin, y, pageWidth - 2 * margin, fallaHeight, 3, 3, 'S');
 
-        doc.setFontSize(9);
-        doc.setFont(undefined, 'bold');
-        doc.text('FALLA REPORTADA:', margin + 3, y + 6);
+    doc.setFontSize(9);
+    doc.setFont(undefined, 'bold');
+    doc.text('FALLA REPORTADA:', margin + 3, y + 6);
 
-        doc.setFontSize(7);
-        doc.setFont(undefined, 'normal');
-        doc.text(fallaLineas, margin + 3, y + 10);
+    doc.setFontSize(7);
+    doc.setFont(undefined, 'normal');
+    doc.text(fallaLineas, margin + 3, y + 11);
 
-        y += fallaHeight + 3;
-    }
+    y += fallaHeight + 3;
+}
+
 
 
     
     // =======================================
     // ACTIVIDAD DE MANTENIMIENTO
     // =======================================
-const actLineas = doc.splitTextToSize(datos.actividadMantenimiento, pageWidth - 2 * margin - 6);    
-const actHeight = Math.max(20, actLineas.length * 4.5 + 12);
+    const actLineas = doc.splitTextToSize(datos.actividadMantenimiento, pageWidth - 2 * margin - 10).filter(l => l.trim() !== '');
+    const actHeight = Math.max(20, actLineas.length * 4.5 + 10);
 
-doc.setFillColor(colorAzulClaro[0], colorAzulClaro[1], colorAzulClaro[2]);
-doc.roundedRect(margin, y, pageWidth - 2 * margin, actHeight, 3, 3, 'F');
-doc.setDrawColor(150, 150, 150);
-doc.roundedRect(margin, y, pageWidth - 2 * margin, actHeight, 3, 3, 'S');
+    doc.setFillColor(colorAzulClaro[0], colorAzulClaro[1], colorAzulClaro[2]);
+    doc.roundedRect(margin, y, pageWidth - 2 * margin, actHeight, 3, 3, 'F');
+    doc.setDrawColor(150, 150, 150);
+    doc.roundedRect(margin, y, pageWidth - 2 * margin, actHeight, 3, 3, 'S');
 
-doc.setFontSize(9);
-doc.setFont(undefined, 'bold');
-doc.text('ACTIVIDAD DE MANTENIMIENTO:', margin + 3, y + 5);
+    doc.setFontSize(9);
+    doc.setFont(undefined, 'bold');
+    doc.text('ACTIVIDAD DE MANTENIMIENTO:', margin + 3, y + 6);
 
-doc.setFontSize(7);
-doc.setFont(undefined, 'normal');
-doc.text(actLineas, margin + 3, y + 10);
+    doc.setFontSize(7);
+    doc.setFont(undefined, 'normal');
+    doc.text(actLineas, margin + 3, y + 11);
 
-y += actHeight + 3;
+    y += actHeight + 3;
+
 
     
     // =======================================
     // OBSERVACIONES
     // =======================================
     
-if (datos.observaciones && datos.observaciones.trim() !== '') {
-    const obsLineas = doc.splitTextToSize(datos.observaciones, pageWidth - 2 * margin - 6);
-    const obsHeight = Math.max(16, obsLineas.length * 4.5 + 12);
+    if (datos.observaciones && datos.observaciones.trim() !== '') {
+    const obsLineas = doc.splitTextToSize(datos.observaciones, pageWidth - 2 * margin - 10).filter(l => l.trim() !== '');
+    const obsHeight = Math.max(16, obsLineas.length * 4.5 + 10);
 
     doc.setFillColor(colorAzulClaro[0], colorAzulClaro[1], colorAzulClaro[2]);
     doc.roundedRect(margin, y, pageWidth - 2 * margin, obsHeight, 3, 3, 'F');
@@ -1889,14 +1891,15 @@ if (datos.observaciones && datos.observaciones.trim() !== '') {
 
     doc.setFontSize(9);
     doc.setFont(undefined, 'bold');
-    doc.text('OBSERVACIONES:', margin + 3, y + 5);
+    doc.text('OBSERVACIONES:', margin + 3, y + 6);
 
     doc.setFontSize(7);
     doc.setFont(undefined, 'normal');
-    doc.text(obsLineas, margin + 3, y + 10);
+    doc.text(obsLineas, margin + 3, y + 11);
 
     y += obsHeight + 3;
 }
+
 
     
     // =======================================
