@@ -1579,8 +1579,7 @@ async function construirPDF(doc, datos) {
         yCheck += 4;
     });
     } else {
-        doc.setFont(undefined, 'italic');
-        doc.text('Equipo sin accesorios', col3X + 3, yCheck);
+        doc.text('EQUIPO SIN ACCESORIOS', col3X + 3, yCheck);
         doc.setFont(undefined, 'normal');
     }
 
@@ -1811,7 +1810,7 @@ if (datos.verificacionParametros.tipo === 'LAMPARA') {
     } else {
     if (datos.verificacionParametros.texto && datos.verificacionParametros.texto.trim() !== '') {
         const paramLineas = doc.splitTextToSize(datos.verificacionParametros.texto, pageWidth - 2 * margin - 6);
-        const paramHeight = Math.max(20, paramLineas.length * 4.5 + 12);
+        const paramHeight = Math.max(20, paramLineas.length * 3 + 12);
 
         doc.setFillColor(colorAzulClaro[0], colorAzulClaro[1], colorAzulClaro[2]);
         doc.roundedRect(margin, y, pageWidth - 2 * margin, paramHeight, 3, 3, 'F');
@@ -1837,7 +1836,7 @@ if (datos.verificacionParametros.tipo === 'LAMPARA') {
         
     if (datos.fallaReportada && datos.fallaReportada.trim() !== '') {
     const fallaLineas = doc.splitTextToSize(datos.fallaReportada, pageWidth - 2 * margin - 10);
-    const fallaHeight = Math.max(16, fallaLineas.length * 2.5 + 10);
+    const fallaHeight = Math.max(16, fallaLineas.length * 3 + 10);
 
     doc.setFillColor(colorAzulClaro[0], colorAzulClaro[1], colorAzulClaro[2]);
     doc.roundedRect(margin, y, pageWidth - 2 * margin, fallaHeight, 3, 3, 'F');
@@ -1862,7 +1861,7 @@ if (datos.verificacionParametros.tipo === 'LAMPARA') {
     // ACTIVIDAD DE MANTENIMIENTO
     // =======================================
     const actLineas = doc.splitTextToSize(datos.actividadMantenimiento, pageWidth - 2 * margin - 10);
-    const actHeight = Math.max(16, actLineas.length * 2.5 + 10);
+    const actHeight = Math.max(16, actLineas.length * 3 + 10);
 
     doc.setFillColor(colorAzulClaro[0], colorAzulClaro[1], colorAzulClaro[2]);
     doc.roundedRect(margin, y, pageWidth - 2 * margin, actHeight, 3, 3, 'F');
@@ -3700,7 +3699,7 @@ async function construirPDFRefrigeracion(doc, datos) {
 
 doc.setFillColor(colorAzulClaro[0], colorAzulClaro[1], colorAzulClaro[2]);
 const actividadLines = doc.splitTextToSize(datos.actividadMantenimiento.toUpperCase(), pageWidth - 2 * margin - 10);
-const actividadHeight = Math.max(20, actividadLines.length * 2.5 + 12);
+const actividadHeight = Math.max(20, actividadLines.length * 3 + 12);
 
 if (y + actividadHeight > pageHeight - margin) {
     doc.addPage();
@@ -3728,7 +3727,7 @@ y += actividadHeight + 3;
 if (datos.observaciones) {
     doc.setFillColor(colorAzulClaro[0], colorAzulClaro[1], colorAzulClaro[2]);
     const observacionesLines = doc.splitTextToSize(datos.observaciones.toUpperCase(), pageWidth - 2 * margin - 10);
-    const observacionesHeight = Math.max(20, observacionesLines.length * 2.5 + 12);
+    const observacionesHeight = Math.max(20, observacionesLines.length * 3 + 12);
 
     if (y + observacionesHeight > pageHeight - margin) {
         doc.addPage();
