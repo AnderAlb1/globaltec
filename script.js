@@ -1831,8 +1831,8 @@ if (datos.verificacionParametros.tipo === 'LAMPARA') {
     // =======================================
         
     if (datos.fallaReportada && datos.fallaReportada.trim() !== '') {
-    const fallaLineas = doc.splitTextToSize(datos.fallaReportada, pageWidth - 2 * margin - 10).filter(l => l.trim() !== '');
-    const fallaHeight = Math.max(16, fallaLineas.length * 4.5 + 10);
+    const fallaLineas = doc.splitTextToSize(datos.fallaReportada, pageWidth - 2 * margin - 10);
+    const fallaHeight = Math.max(16, fallaLineas.length * 3.5 + 10);
 
     doc.setFillColor(colorAzulClaro[0], colorAzulClaro[1], colorAzulClaro[2]);
     doc.roundedRect(margin, y, pageWidth - 2 * margin, fallaHeight, 3, 3, 'F');
@@ -1845,7 +1845,7 @@ if (datos.verificacionParametros.tipo === 'LAMPARA') {
 
     doc.setFontSize(7);
     doc.setFont(undefined, 'normal');
-    doc.text(fallaLineas, margin + 3, y + 11);
+    doc.text(fallaLineas, margin + 3, y + 10);
 
     y += fallaHeight + 3;
 }
@@ -1856,8 +1856,8 @@ if (datos.verificacionParametros.tipo === 'LAMPARA') {
     // =======================================
     // ACTIVIDAD DE MANTENIMIENTO
     // =======================================
-    const actLineas = doc.splitTextToSize(datos.actividadMantenimiento, pageWidth - 2 * margin - 10).filter(l => l.trim() !== '');
-    const actHeight = Math.max(20, actLineas.length * 4.5 + 10);
+    const actLineas = doc.splitTextToSize(datos.actividadMantenimiento, pageWidth - 2 * margin - 10);
+    const actHeight = Math.max(16, actLineas.length * 3.5 + 10);
 
     doc.setFillColor(colorAzulClaro[0], colorAzulClaro[1], colorAzulClaro[2]);
     doc.roundedRect(margin, y, pageWidth - 2 * margin, actHeight, 3, 3, 'F');
@@ -1870,7 +1870,7 @@ if (datos.verificacionParametros.tipo === 'LAMPARA') {
 
     doc.setFontSize(7);
     doc.setFont(undefined, 'normal');
-    doc.text(actLineas, margin + 3, y + 11);
+    doc.text(actLineas, margin + 3, y + 10);
 
     y += actHeight + 3;
 
@@ -1881,8 +1881,8 @@ if (datos.verificacionParametros.tipo === 'LAMPARA') {
     // =======================================
     
     if (datos.observaciones && datos.observaciones.trim() !== '') {
-    const obsLineas = doc.splitTextToSize(datos.observaciones, pageWidth - 2 * margin - 10).filter(l => l.trim() !== '');
-    const obsHeight = Math.max(16, obsLineas.length * 4.5 + 10);
+    const obsLineas = doc.splitTextToSize(datos.observaciones, pageWidth - 2 * margin - 10);
+    const obsHeight = Math.max(16, obsLineas.length * 3.5 + 10);
 
     doc.setFillColor(colorAzulClaro[0], colorAzulClaro[1], colorAzulClaro[2]);
     doc.roundedRect(margin, y, pageWidth - 2 * margin, obsHeight, 3, 3, 'F');
@@ -1895,7 +1895,7 @@ if (datos.verificacionParametros.tipo === 'LAMPARA') {
 
     doc.setFontSize(7);
     doc.setFont(undefined, 'normal');
-    doc.text(obsLineas, margin + 3, y + 11);
+    doc.text(obsLineas, margin + 3, y + 10);
 
     y += obsHeight + 3;
 }
