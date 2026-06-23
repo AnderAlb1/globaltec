@@ -1805,7 +1805,7 @@ if (datos.verificacionParametros.tipo === 'LAMPARA') {
         
     } else {
     if (datos.verificacionParametros.texto && datos.verificacionParametros.texto.trim() !== '') {
-        const paramLineas = doc.splitTextToSize(datos.verificacionParametros.texto, pageWidth - 2 * margin - 6);
+        const paramLineas = doc.splitTextToSize(datos.verificacionParametros.texto, pageWidth - 2 * margin - 6).filter(l => l.trim() !== '');
         const paramHeight = Math.max(20, paramLineas.length * 4.5 + 12);
 
         doc.setFillColor(colorAzulClaro[0], colorAzulClaro[1], colorAzulClaro[2]);
@@ -1831,7 +1831,7 @@ if (datos.verificacionParametros.tipo === 'LAMPARA') {
     // =======================================
     
     if (datos.fallaReportada && datos.fallaReportada.trim() !== '') {
-    const fallaLineas = doc.splitTextToSize(datos.fallaReportada, pageWidth - 2 * margin - 6);
+    const fallaLineas = doc.splitTextToSize(datos.fallaReportada, pageWidth - 2 * margin - 6).filter(l => l.trim() !== '');
     const fallaHeight = Math.max(16, fallaLineas.length * 5 + 14);
 
     doc.setFillColor(colorAzulClaro[0], colorAzulClaro[1], colorAzulClaro[2]);
@@ -1843,7 +1843,7 @@ if (datos.verificacionParametros.tipo === 'LAMPARA') {
     doc.setFont(undefined, 'bold');
     doc.text('FALLA REPORTADA:', margin + 3, y + 5);
 
-    doc.setFontSize(8);
+    doc.setFontSize(7);
     doc.setFont(undefined, 'normal');
     doc.text(fallaLineas, margin + 3, y + 11);
 
@@ -1854,8 +1854,7 @@ if (datos.verificacionParametros.tipo === 'LAMPARA') {
     // =======================================
     // ACTIVIDAD DE MANTENIMIENTO
     // =======================================
-    
-const actLineas = doc.splitTextToSize(datos.actividadMantenimiento, pageWidth - 2 * margin - 6);
+const actLineas = doc.splitTextToSize(datos.actividadMantenimiento, pageWidth - 2 * margin - 6).filter(l => l.trim() !== '');    
 const actHeight = Math.max(20, actLineas.length * 5 + 14);
 
 doc.setFillColor(colorAzulClaro[0], colorAzulClaro[1], colorAzulClaro[2]);
@@ -1879,7 +1878,7 @@ y += actHeight + 3;
     // =======================================
     
 if (datos.observaciones && datos.observaciones.trim() !== '') {
-    const obsLineas = doc.splitTextToSize(datos.observaciones, pageWidth - 2 * margin - 6);
+    const obsLineas = doc.splitTextToSize(datos.observaciones, pageWidth - 2 * margin - 6).filter(l => l.trim() !== '');
     const obsHeight = Math.max(16, obsLineas.length * 5 + 14);
 
     doc.setFillColor(colorAzulClaro[0], colorAzulClaro[1], colorAzulClaro[2]);
