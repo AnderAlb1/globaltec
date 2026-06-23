@@ -1573,12 +1573,17 @@ async function construirPDF(doc, datos) {
     yCheck = y + 10;
     
     if (datos.accesoriosEstado && datos.accesoriosEstado.length > 0) {
-        datos.accesoriosEstado.slice(0, 7).forEach(acc => {
-            const texto = `${acc.nombre.substring(0, 60)}: ${acc.estado}`;
-            doc.text(texto, col3X + 3, yCheck);
-            yCheck += 4;
-        });
-    } 
+    datos.accesoriosEstado.slice(0, 7).forEach(acc => {
+        const texto = `${acc.nombre.substring(0, 60)}: ${acc.estado}`;
+        doc.text(texto, col3X + 3, yCheck);
+        yCheck += 4;
+    });
+    } else {
+        doc.setFont(undefined, 'italic');
+        doc.text('Equipo sin accesorios', col3X + 3, yCheck);
+        doc.setFont(undefined, 'normal');
+    }
+
     
     y += sectionHeight2 + 3;
     
